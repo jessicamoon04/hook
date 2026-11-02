@@ -1,0 +1,27 @@
+/* Self-hosted so visitors' browsers never contact a third-party font service.
+   Fonts are licensed under the SIL Open Font License; see the OFL-*.txt files in this folder. */
+
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 500 900;
+  font-stretch: 100% 125%;
+  font-display: swap;
+  src: url("archivo-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Figtree";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("figtree-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("jetbrainsmono-latin.woff2") format("woff2");
+}

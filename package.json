@@ -1,0 +1,7 @@
+{
+  "name": "hook-check",
+  "private": true,
+  "engines": {
+    "node": "22.x"
+  }
+}

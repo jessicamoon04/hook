@@ -106,7 +106,7 @@
     <p>When you paste a link, email or text message, the checking happens inside your own browser. The text is not sent to us, not stored, and is gone when you close or reload the page.</p>
 
     <h2>Website age lookups</h2>
-    <p>To tell you how old a website is, Hook Check sends only the domain name (for example <code>example.com</code>, never the full link or your message) to our server function. That function asks <a href="https://rdap.org" target="_blank" rel="noopener noreferrer">rdap.org<span class="sr-only"> (opens in a new tab)</span></a>, a public registration lookup service, which forwards the request to the registry for that domain ending.</p>
+    <p>To tell you how old a website is, Hook Check sends only the domain name (for example <code>example.com</code>, never the full link or your message) to our server function. That function asks the public registration lookup service (RDAP) run by the registry for that domain ending, which it finds using the official list published by <a href="https://www.iana.org" target="_blank" rel="noopener noreferrer">IANA<span class="sr-only"> (opens in a new tab)</span></a>. If the registry doesn&rsquo;t answer, it asks <a href="https://rdap.org" target="_blank" rel="noopener noreferrer">rdap.org<span class="sr-only"> (opens in a new tab)</span></a>, a free lookup service, instead.</p>
     <p>We don&rsquo;t keep a record of these lookups. To keep the site fast, our hosting provider may cache each answer (the domain name and its registration date) for up to 24 hours. The cached answer does not include who asked.</p>
     <p>Your browser only ever talks to our own site. rdap.org and the registries see a request from our server, not from you, so they don&rsquo;t receive your IP address.</p>
 

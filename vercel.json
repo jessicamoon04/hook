@@ -1,4 +1,7 @@
 {
+  "functions": {
+    "api/domain-age.js": { "maxDuration": 15 }
+  },
   "headers": [
     {
       "source": "/(.*)",
