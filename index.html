@@ -8,10 +8,17 @@
 <meta property="og:title" content="Hook Check: is that link a trap?">
 <meta property="og:description" content="Paste a suspicious link, email or text and see the warning signs before you click.">
 <meta property="og:type" content="website">
-<meta name="theme-color" content="#e8661a">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23e8661a'/%3E%3Cpath d='M19 5v13a5 5 0 0 1-10 0v-3' fill='none' stroke='%23fff8ee' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..900&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
+<meta property="og:image" content="/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Hook Check: is that link a trap? A phishing link marked Likely phishing.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#9a3108">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-48.png" type="image/png" sizes="48x48">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
   /* Layout: orange hero band (headline + message form beside the hooked-card illustration), a wide result panel (link picker, verdict, details), then a three-part field guide */
   :root {
@@ -20,19 +27,24 @@
     --ink: #2b1608;
     --muted: #7a5a44;
     --line: #ecdcc4;
-    --accent: #d9560f;
-    --band-a: #c2410c;
-    --band-b: #f47a2a;
+    --accent: #b4440b;
+    --band-a: #9a3108;
+    --band-b: #c2410c;
     --on-band: #fff8ee;
-    --on-band-soft: #ffe6cc;
+    --on-band-soft: #ffeedd;
     --btn-bg: #fff4e2;
     --btn-ink: #b33c08;
-    --danger: #c2413b;
+    --danger: #b3352f;
     --danger-bg: #fbeae8;
     --warn: #9a5800;
     --warn-bg: #fff1d9;
     --ok: #10784a;
     --ok-bg: #e1f4e9;
+    --accent-ink: #ffffff;
+    --foot-bg: #2b1608;
+    --foot-ink: #fbf3e6;
+    --foot-muted: #c9ab92;
+    --foot-line: #4a2c17;
     --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
     --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
     --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
@@ -42,6 +54,7 @@
       --bg: #160c05; --surface: #22140a; --ink: #f8ebdc; --muted: #c4a58a;
       --line: #3a2615; --accent: #ff9a4d; --band-a: #7a2b05; --band-b: #b8470f;
       --danger: #ff8a7a; --danger-bg: #36181a; --warn: #f2a93b; --warn-bg: #36260b; --ok: #45d08f; --ok-bg: #0f2d20;
+      --accent-ink: #2b1608; --foot-bg: #0c0603; --foot-ink: #f8ebdc; --foot-muted: #b39579; --foot-line: #2a1a0e;
       color-scheme: dark;
     }
   }
@@ -49,6 +62,7 @@
     --bg: #160c05; --surface: #22140a; --ink: #f8ebdc; --muted: #c4a58a;
     --line: #3a2615; --accent: #ff9a4d; --band-a: #7a2b05; --band-b: #b8470f;
     --danger: #ff8a7a; --danger-bg: #36181a; --warn: #f2a93b; --warn-bg: #36260b; --ok: #45d08f; --ok-bg: #0f2d20;
+      --accent-ink: #2b1608; --foot-bg: #0c0603; --foot-ink: #f8ebdc; --foot-muted: #b39579; --foot-line: #2a1a0e;
     color-scheme: dark;
   }
 
@@ -67,6 +81,96 @@
     padding-right: max(16px, env(safe-area-inset-right, 0px));
   }
 
+  /* scroll-padding keeps whatever has keyboard focus clear of the sticky nav */
+  html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+  section[id], header[id], .result { scroll-margin-top: 80px; }
+  .skip-link {
+    position: absolute;
+    left: 16px;
+    top: -100px;
+    z-index: 40;
+    background: var(--surface);
+    color: var(--ink);
+    font-weight: 700;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 2px solid var(--ink);
+  }
+  .skip-link:focus { top: calc(env(safe-area-inset-top, 0px) + 12px); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font: 700 15.5px/1.2 var(--body);
+    text-decoration: none;
+    border-radius: 12px;
+    padding: 13px 22px;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+  }
+  .btn-lg { font-size: 17px; padding: 16px 28px; }
+  .btn-light { background: var(--btn-bg); color: var(--btn-ink); box-shadow: 0 6px 18px rgba(90, 30, 0, .28); }
+  .btn-light:hover { background: #ffffff; }
+  .btn-ghost { background: transparent; color: var(--on-band); border-color: rgba(255, 255, 255, .55); }
+  .btn-ghost:hover { background: rgba(255, 255, 255, .12); }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .nav .btn:focus-visible, .hero .btn:focus-visible, .cta-box .btn:focus-visible { outline-color: var(--on-band); }
+
+  /* ---------- nav ---------- */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    z-index: 31;
+    background: var(--band-a);
+  }
+  .nav {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 30;
+    background: var(--band-a);
+    color: var(--on-band);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .12), 0 8px 24px rgba(90, 30, 0, .18);
+  }
+  .nav .wrap { display: flex; align-items: center; gap: 28px; min-height: 66px; position: relative; }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font: 800 19px/1 var(--display);
+    font-stretch: 108%;
+    color: var(--on-band);
+    text-decoration: none;
+    margin-right: auto;
+  }
+  .brand svg { width: 32px; height: 32px; flex: none; }
+  .nav-links { display: flex; gap: 26px; list-style: none; margin: 0; padding: 0; }
+  .nav-links a { color: var(--on-band-soft); text-decoration: none; font-weight: 600; font-size: 15px; }
+  .nav-links a:hover { color: var(--on-band); }
+  .nav-links a:focus-visible, .brand:focus-visible { outline: 2px solid var(--on-band); outline-offset: 4px; border-radius: 4px; }
+  .nav .btn { padding: 10px 16px; font-size: 14.5px; }
+  .menu-btn {
+    display: none;
+    font: 700 14.5px var(--body);
+    color: var(--on-band);
+    background: transparent;
+    border: 1.5px solid rgba(255, 255, 255, .45);
+    border-radius: 10px;
+    padding: 9px 12px;
+    cursor: pointer;
+  }
+  .menu-btn:focus-visible { outline: 2px solid var(--on-band); outline-offset: 2px; }
+
   /* ---------- hero ---------- */
   .hero {
     background: radial-gradient(120% 90% at 75% 30%, var(--band-b), var(--band-a));
@@ -74,74 +178,95 @@
   }
   .hero .wrap {
     display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
     gap: 48px;
     align-items: center;
-    padding-block: 56px 64px;
+    padding-block: 64px 150px;
   }
   .eyebrow {
     font: 600 13px/1 var(--body);
-    letter-spacing: .14em;
+    letter-spacing: .12em;
     text-transform: uppercase;
     color: var(--on-band-soft);
-    margin: 0 0 14px;
+    margin: 0 0 18px;
   }
   h1 {
     font-family: var(--display);
     font-stretch: 112%;
     font-weight: 850;
-    font-size: clamp(40px, 6.4vw, 68px);
-    line-height: .98;
-    letter-spacing: -.02em;
-    margin: 0 0 18px;
+    font-size: clamp(46px, 7vw, 80px);
+    line-height: .95;
+    letter-spacing: -.025em;
+    margin: 0 0 20px;
     text-wrap: balance;
   }
   .lede {
-    font-size: 18px;
+    font-size: 20px;
+    line-height: 1.45;
     color: var(--on-band-soft);
-    max-width: 34em;
-    margin: 0 0 28px;
+    max-width: 26em;
+    margin: 0 0 32px;
   }
-  .check-form { display: grid; gap: 10px; }
-  .check-form label { font-weight: 600; font-size: 14px; }
+  .hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+  .trust { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14.5px; font-weight: 600; color: var(--on-band-soft); }
+  .trust li::before { content: "\2713"; margin-right: 7px; color: var(--on-band); }
+  .art {
+    width: 100%;
+    max-width: 460px;
+    height: auto;
+    display: block;
+    justify-self: center;
+    border-radius: 22px;
+    box-shadow: 0 30px 60px rgba(90, 30, 0, .4);
+  }
+  .art .ui { font-family: var(--body); }
+  .art .heavy { font-family: var(--display); font-weight: 900; }
+
+  /* ---------- checker ---------- */
+  .checker { margin-top: -96px; position: relative; padding-bottom: 24px; }
+  .checker-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 22px 48px rgba(90, 40, 10, .14);
+  }
+  .checker-card h2 { font: 800 clamp(24px, 3vw, 30px)/1.1 var(--display); font-stretch: 108%; margin: 0 0 6px; }
+  .checker-sub { margin: 0 0 18px; color: var(--muted); }
+  .check-form { display: grid; gap: 12px; }
   .check-form textarea {
     width: 100%;
     min-width: 0;
-    min-height: 92px;
+    min-height: 104px;
     resize: vertical;
     font: 500 15px/1.5 var(--mono);
     padding: 14px 16px;
     border-radius: 12px;
-    border: 2px solid transparent;
-    background: var(--surface);
+    border: 2px solid var(--line);
+    background: var(--bg);
     color: var(--ink);
   }
-  .check-form textarea:focus-visible { outline: none; border-color: var(--ink); }
+  .check-form textarea:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent); }
+  .check-form textarea::placeholder { color: var(--muted); opacity: 1; }
   .check-form textarea[aria-invalid="true"] { border-color: var(--danger); }
   .form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
-  .hint { font-size: 13.5px; color: var(--on-band-soft); }
-  .btn-check {
-    font: 700 16px var(--body);
-    padding: 14px 28px;
-    border-radius: 12px;
-    border: 0;
-    background: var(--btn-bg);
-    color: var(--btn-ink);
-    cursor: pointer;
-    box-shadow: 0 6px 18px rgba(90, 30, 0, .3);
-  }
-  .btn-check:hover { background: #ffffff; }
-  .btn-check:focus-visible { outline: 3px solid var(--on-band); outline-offset: 2px; }
-  .form-error { margin: 0; font-weight: 700; color: var(--on-band); min-height: 1.5em; }
+  .btn-check { padding: 14px 32px; font-size: 16px; }
+  .hint { font-size: 13.5px; color: var(--muted); }
+  .form-note { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 70ch; }
+  .form-note code { font-size: 12.5px; }
+  .form-note a, .checker-sub a { color: var(--accent); font-weight: 600; }
+  .form-note a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .form-error { margin: 0; font-weight: 700; color: var(--danger); min-height: 1.5em; }
+  .form-error:empty { min-height: 0; }
   .examples { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  .examples span { font-size: 13px; color: var(--on-band-soft); margin-right: 2px; }
+  .examples span { font-size: 13.5px; color: var(--muted); margin-right: 2px; }
   .chip-ex {
     font: 500 12.5px var(--mono);
-    color: var(--on-band);
-    background: rgba(255, 255, 255, .14);
-    border: 1px solid rgba(255, 255, 255, .35);
-    border-radius: 999px;
-    padding: 5px 11px;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 12px;
     cursor: pointer;
     max-width: 100%;
     overflow: hidden;
@@ -149,22 +274,10 @@
     white-space: nowrap;
   }
   .chip-ex.chip-msg { font-family: var(--body); font-weight: 600; }
-  .chip-ex:hover { background: rgba(255, 255, 255, .26); }
-  .chip-ex:focus-visible { outline: 2px solid var(--on-band); outline-offset: 2px; }
-  .art {
-    width: 100%;
-    max-width: 480px;
-    height: auto;
-    display: block;
-    justify-self: center;
-    border-radius: 22px;
-    box-shadow: 0 30px 60px rgba(90, 30, 0, .4);
-  }
-  .art .ui { font-family: "Poppins", var(--body); }
-  .art .heavy { font-family: "Poppins", var(--body); font-weight: 900; }
+  .chip-ex:hover { border-color: var(--accent); color: var(--accent); }
+  .chip-ex:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* ---------- result ---------- */
-  main { padding-block: 40px 24px; }
   .result {
     background: var(--surface);
     border: 1px solid var(--line);
@@ -172,9 +285,9 @@
     display: grid;
     grid-template-columns: 300px minmax(0, 1fr);
     overflow: hidden;
-    margin-top: -88px;
+    margin-top: 20px;
     position: relative;
-    box-shadow: 0 18px 40px rgba(90, 40, 10, .12);
+    box-shadow: 0 18px 40px rgba(90, 40, 10, .1);
   }
   .linklist {
     grid-column: 1 / -1;
@@ -332,36 +445,118 @@
   .deeper a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .deeper-cap { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
 
-  /* ---------- guide ---------- */
-  .guide { padding-block: 40px 56px; }
-  .guide > h2 {
+  /* ---------- content sections ---------- */
+  .section { padding-block: 72px 8px; }
+  .sec-head { max-width: 40em; margin-bottom: 32px; }
+  .sec-head h2 {
     font-family: var(--display);
     font-stretch: 110%;
     font-weight: 800;
-    font-size: clamp(26px, 3.4vw, 34px);
-    margin: 0 0 20px;
+    font-size: clamp(30px, 3.8vw, 42px);
+    line-height: 1.04;
+    letter-spacing: -.015em;
+    margin: 0 0 12px;
     text-wrap: balance;
   }
+  .sec-head p { margin: 0; color: var(--muted); font-size: 17px; }
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .steps li { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px; }
+  .step-num {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--accent); color: var(--accent-ink);
+    font: 800 17px/1 var(--display);
+    margin-bottom: 16px;
+  }
+  .steps h3 { font-size: 19px; margin: 0 0 6px; }
+  .steps p { margin: 0; color: var(--muted); font-size: 15.5px; }
   .guide-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
-  .guide h3 { font-size: 17px; margin: 0 0 8px; }
-  .guide ul { margin: 0; padding-left: 18px; color: var(--muted); display: grid; gap: 6px; font-size: 15px; }
+  .guide h3 { font-size: 18px; margin: 0 0 10px; }
+  .guide ul { margin: 0; padding-left: 18px; color: var(--muted); display: grid; gap: 8px; font-size: 15.5px; }
   .guide ul b { color: var(--ink); font-weight: 600; }
-  footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13.5px; }
-  footer .wrap { padding-block: 20px 28px; }
 
+  /* ---------- CTA band ---------- */
+  .cta-band { padding-block: 72px; }
+  .cta-box {
+    background: radial-gradient(120% 140% at 85% 20%, var(--band-b), var(--band-a));
+    color: var(--on-band);
+    border-radius: 24px;
+    padding: 48px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+  }
+  .cta-box > div:first-child { min-width: 0; flex: 1 1 360px; }
+  .cta-box h2 { font: 800 clamp(28px, 3.6vw, 40px)/1.05 var(--display); font-stretch: 110%; margin: 0 0 10px; text-wrap: balance; }
+  .cta-box p { margin: 0; color: var(--on-band-soft); font-size: 17px; max-width: 32em; }
+  .cta-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+  /* ---------- footer ---------- */
+  .site-footer { background: var(--foot-bg); color: var(--foot-ink); font-size: 15px; }
+  .foot-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+    gap: 36px;
+    padding-block: 56px 36px;
+  }
+  .site-footer .brand { color: var(--foot-ink); }
+  .foot-brand p { color: var(--foot-muted); max-width: 30em; margin: 14px 0 0; font-size: 14.5px; }
+  .site-footer h3 { font: 700 12.5px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--foot-muted); margin: 6px 0 16px; }
+  .site-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .site-footer a, .link-btn { color: var(--foot-ink); text-decoration: none; }
+  .site-footer a:hover, .link-btn:hover { text-decoration: underline; }
+  .site-footer a:focus-visible, .link-btn:focus-visible { outline: 2px solid var(--foot-ink); outline-offset: 3px; border-radius: 3px; }
+  .link-btn { font: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+  .foot-bottom {
+    border-top: 1px solid var(--foot-line);
+    padding-block: 20px 32px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 24px;
+    color: var(--foot-muted);
+    font-size: 13.5px;
+  }
+
+  @media (max-width: 900px) {
+    .nav-links {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      gap: 0;
+      background: var(--band-a);
+      padding: 8px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px));
+      box-shadow: 0 12px 24px rgba(90, 30, 0, .25);
+    }
+    .nav-links.open { display: flex; }
+    .nav-links a { display: block; padding: 12px 0; font-size: 16px; }
+    .menu-btn { display: block; }
+    .nav .wrap { gap: 10px; }
+  }
   @media (max-width: 860px) {
-    .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-block: 40px 112px; }
-    .art { max-width: 360px; grid-row: 1; }
+    .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 36px; padding-block: 44px 136px; }
+    .art { max-width: 340px; }
     .result { grid-template-columns: minmax(0, 1fr); }
     .verdict { border-right: 0; border-bottom: 1px solid var(--line); }
-    .guide-grid { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+    .guide-grid, .steps { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+    .foot-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .foot-brand { grid-column: 1 / -1; }
   }
   @media (max-width: 480px) {
-    .btn-check { flex: 1 1 100%; }
+    .nav .btn { display: none; }
+    .hero-ctas .btn, .cta-actions .btn, .btn-check { flex: 1 1 100%; }
+    .checker-card, .cta-box { padding: 22px; }
     .details, .verdict, .linklist { padding: 20px; }
     .ll-item code { max-width: 22ch; }
+    .foot-grid { grid-template-columns: minmax(0, 1fr); }
   }
   @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
     .meter i { transition: none; }
     .sev-wait { animation: none; }
   }
@@ -369,183 +564,222 @@
 </head>
 <body>
 
-<header class="hero">
+<a class="skip-link" href="#checker" data-focus-checker>Skip to the link checker</a>
+
+<nav class="nav" aria-label="Main">
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="15" fill="#fff4e2"/>
+        <path d="M19 6v12a5 5 0 0 1-10 0v-3" fill="none" stroke="#d9560f" stroke-width="3" stroke-linecap="round"/>
+        <path d="M9 15l-2.6 3.4M9 15l2.6 3.4" stroke="#d9560f" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      Hook Check
+    </a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#checker" data-focus-checker>Checker</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#guide">What to do</a></li>
+    </ul>
+    <a class="btn btn-light" href="#checker" data-focus-checker>Check a link</a>
+    <button class="menu-btn" type="button" id="menu-btn" aria-expanded="false" aria-controls="nav-links">Menu</button>
+  </div>
+</nav>
+
+<header class="hero" id="top">
   <div class="wrap">
     <div>
-      <p class="eyebrow">Phishing link checker</p>
+      <p class="eyebrow">Free phishing link checker</p>
       <h1>Is that link a trap?</h1>
-      <p class="lede">Paste a link, or a whole email or text message. Hook Check pulls out every link, reads each one the way a scammer builds it, checks how new the website is, and tells you what looks wrong before you click.</p>
-      <form class="check-form" id="check-form" novalidate>
-        <label for="url-input">Paste a link or a whole message</label>
-        <textarea id="url-input" name="url" rows="3" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://example.com/login, or paste the full email or text" aria-describedby="url-error url-hint"></textarea>
-        <div class="form-actions">
-          <button class="btn-check" type="submit" id="check-btn">Check</button>
-          <span class="hint" id="url-hint">Enter to check, Shift+Enter for a new line.</span>
-        </div>
-        <p class="form-error" id="url-error" role="alert"></p>
-        <div class="examples" id="examples">
-          <span>Try an example:</span>
-          <button type="button" class="chip-ex chip-msg" data-url="USPS: Your package is on hold due to an incomplete address. Update your details within 24 hours: https://usps-redelivery-help.top/track?id=US9514 or visit www.usps.com for more info. Reply STOP to opt out.">A delivery text</button>
-          <button type="button" class="chip-ex" data-url="http://paypa1-secure-login.xyz/verify/account">paypa1-secure-login.xyz</button>
-          <button type="button" class="chip-ex" data-url="https://accounts.google.com.security-check.top/signin?continue=https://mail.google.com">google.com.security-check.top</button>
-          <button type="button" class="chip-ex" data-url="https://www.paypal.com/signin">www.paypal.com</button>
-        </div>
-      </form>
+      <p class="lede">Paste a link, email or text. See who really owns each link and what looks wrong, before you click.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-light btn-lg" href="#checker" data-focus-checker>Check a link now</a>
+        <a class="btn btn-ghost btn-lg" href="#how">How it works</a>
+      </div>
+      <ul class="trust">
+        <li>Free, no sign-up</li>
+        <li>Checks website age</li>
+        <li>Messages stay on your device</li>
+      </ul>
     </div>
 
-    <svg class="art" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A fishing hook catching a cream login card, surrounded by spheres reading HACKED and exclamation marks">
+    <svg class="art" viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A login card hangs from a fishing hook like bait, surrounded by a HACKED sign, a skull badge and warning signs.">
       <defs>
-        <clipPath id="frame"><rect width="512" height="512" rx="18"/></clipPath>
-        <radialGradient id="bg" cx="50%" cy="42%" r="78%">
-          <stop offset="0" stop-color="#ffa45a"/><stop offset=".5" stop-color="#f0701f"/><stop offset="1" stop-color="#b8460a"/>
+        <clipPath id="art-frame"><rect width="520" height="520" rx="28"/></clipPath>
+        <radialGradient id="art-bg" cx="58%" cy="34%" r="80%">
+          <stop offset="0" stop-color="#7a3410"/><stop offset=".55" stop-color="#4a200a"/><stop offset="1" stop-color="#2b1608"/>
         </radialGradient>
-        <radialGradient id="creamBall" cx="36%" cy="30%" r="74%">
-          <stop offset="0" stop-color="#ffffff"/><stop offset=".25" stop-color="#fff3df"/><stop offset=".65" stop-color="#f1d6ae"/><stop offset="1" stop-color="#c3935f"/>
-        </radialGradient>
-        <radialGradient id="darkBall" cx="36%" cy="28%" r="74%">
-          <stop offset="0" stop-color="#a0705a"/><stop offset=".2" stop-color="#5a321b"/><stop offset=".62" stop-color="#2b150a"/><stop offset="1" stop-color="#100703"/>
-        </radialGradient>
-        <!-- rim shading laid over text so it reads as wrapped around a sphere -->
-        <radialGradient id="rimCream" cx="40%" cy="36%" r="70%">
-          <stop offset=".55" stop-color="#8a5526" stop-opacity="0"/><stop offset="1" stop-color="#7a4518" stop-opacity=".55"/>
-        </radialGradient>
-        <radialGradient id="rimDark" cx="40%" cy="36%" r="70%">
-          <stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".8"/>
-        </radialGradient>
-        <linearGradient id="cardCream" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#fffbf3"/><stop offset=".55" stop-color="#fcefd9"/><stop offset="1" stop-color="#f2dcb8"/>
-        </linearGradient>
-        <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#fff" stop-opacity=".4"/><stop offset=".5" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity=".28"/>
-        </linearGradient>
-        <clipPath id="c74"><circle r="74"/></clipPath>
-        <clipPath id="c57"><circle r="57"/></clipPath>
-        <clipPath id="c48"><circle r="48"/></clipPath>
-        <clipPath id="c60"><circle r="60"/></clipPath>
-        <clipPath id="c40"><circle r="40"/></clipPath>
-        <filter id="blurFar" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
-        <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter>
-        <filter id="shadow" x="-50%" y="-200%" width="200%" height="500%"><feGaussianBlur stdDeviation="14"/></filter>
+        <pattern id="art-keys" width="36" height="16" patternUnits="userSpaceOnUse">
+          <rect x="3" y="3" width="30" height="10" rx="3" fill="#2e170a"/>
+        </pattern>
+        <filter id="art-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>
+        <filter id="art-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="30"/></filter>
       </defs>
-      <g clip-path="url(#frame)">
-        <rect width="512" height="512" fill="url(#bg)"/>
-        <g filter="url(#blurFar)" opacity=".9">
-          <circle cx="232" cy="6" r="42" fill="url(#creamBall)"/>
-          <g transform="translate(286 -8) rotate(4)">
-            <rect width="120" height="62" rx="4" fill="#fff1dc"/>
-            <circle cx="60" cy="20" r="11" fill="#e8661a" opacity=".7"/>
-            <rect x="30" y="38" width="60" height="5" rx="2.5" fill="#e8661a" opacity=".45"/>
-            <rect x="30" y="48" width="50" height="5" rx="2.5" fill="#e8661a" opacity=".35"/>
+      <g clip-path="url(#art-frame)">
+        <rect width="520" height="520" fill="url(#art-bg)"/>
+
+        <!-- faded windows in the background -->
+        <g filter="url(#art-blur)" opacity=".32">
+          <g transform="translate(40 52) rotate(-4)">
+            <rect width="150" height="92" rx="14" fill="#f3dcc0"/>
+            <circle cx="18" cy="16" r="4" fill="#b4440b"/><circle cx="32" cy="16" r="4" fill="#7a5a44"/><circle cx="46" cy="16" r="4" fill="#7a5a44"/>
+            <rect x="16" y="40" width="118" height="12" rx="4" fill="#d9bb96"/>
+            <rect x="16" y="62" width="80" height="12" rx="4" fill="#d9bb96"/>
           </g>
-          <circle cx="505" cy="8" r="34" fill="url(#darkBall)"/>
-          <line x1="468" y1="0" x2="470" y2="215" stroke="#3a1d08" stroke-width="2" opacity=".7"/>
-          <line x1="58" y1="0" x2="60" y2="110" stroke="#3a1d08" stroke-width="1.6" opacity=".45"/>
-          <g transform="translate(18 104) rotate(-5)">
-            <rect width="125" height="70" rx="4" fill="#fff1dc"/>
-            <circle cx="35" cy="26" r="11" fill="#e8661a" opacity=".7"/>
-            <rect x="56" y="22" width="52" height="6" rx="3" fill="#e8661a" opacity=".45"/>
-            <rect x="20" y="46" width="85" height="6" rx="3" fill="#e8661a" opacity=".35"/>
+          <g transform="translate(14 238) rotate(-3)">
+            <rect width="140" height="96" rx="14" fill="#f3dcc0"/>
+            <circle cx="40" cy="38" r="14" fill="#a07a58"/>
+            <path d="M18 76 a22 18 0 0 1 44 0z" fill="#a07a58"/>
+            <rect x="74" y="30" width="50" height="9" rx="4" fill="#d9bb96"/>
+            <rect x="74" y="48" width="40" height="9" rx="4" fill="#d9bb96"/>
           </g>
-          <g transform="translate(456 96)">
-            <circle r="44" fill="url(#creamBall)"/>
-            <text x="-6" y="24" text-anchor="middle" font-size="62" fill="#e0611a" class="heavy">!</text>
+          <g transform="translate(384 66) rotate(5)">
+            <rect width="130" height="112" rx="14" fill="#f3dcc0"/>
+            <path d="M50 52 v-12 a15 15 0 0 1 30 0 v12" fill="none" stroke="#a07a58" stroke-width="8"/>
+            <rect x="40" y="50" width="50" height="40" rx="7" fill="#a07a58"/>
           </g>
-          <g transform="translate(22 258)">
-            <circle r="40" fill="url(#darkBall)"/>
-            <g clip-path="url(#c40)"><text x="4" y="18" text-anchor="middle" font-size="50" fill="#fff4e2" opacity=".85" class="heavy">!</text></g>
-          </g>
-          <g transform="translate(402 214) rotate(6)">
-            <rect width="130" height="100" rx="5" fill="#fff1dc"/>
-            <circle cx="62" cy="32" r="16" fill="#e8661a" opacity=".75"/>
-            <circle cx="62" cy="29" r="5" fill="none" stroke="#fff1dc" stroke-width="2"/>
-            <rect x="28" y="60" width="74" height="7" rx="3.5" fill="#e8661a" opacity=".45"/>
-            <rect x="28" y="74" width="60" height="7" rx="3.5" fill="#e8661a" opacity=".35"/>
-          </g>
-          <circle cx="492" cy="338" r="36" fill="url(#darkBall)"/>
-        </g>
-        <ellipse cx="238" cy="446" rx="150" ry="16" fill="#6e2604" opacity=".5" filter="url(#shadow)"/>
-        <g transform="translate(120 46)">
-          <circle r="74" fill="url(#creamBall)"/>
-          <g clip-path="url(#c74)">
-            <text transform="rotate(17) scale(1 1.08)" x="2" y="12" text-anchor="middle" font-size="40" letter-spacing="-1" fill="#e0611a" class="heavy">HACKED!</text>
-            <circle r="74" fill="url(#rimCream)"/>
-          </g>
-          <ellipse cx="-30" cy="-36" rx="22" ry="11" transform="rotate(-35 -30 -36)" fill="#fff" opacity=".7" filter="url(#soft)"/>
-        </g>
-        <g transform="translate(255 250) rotate(7) skewX(-2)">
-          <rect x="-152" y="-120" width="304" height="240" rx="10" fill="url(#glass)" stroke="#fff" stroke-opacity=".7" stroke-width="1.5"/>
-          <rect x="-146" y="-114" width="292" height="228" rx="8" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="1"/>
-          <rect x="-136" y="-100" width="272" height="202" rx="3" fill="url(#cardCream)"/>
-          <g opacity=".35" fill="#fff">
-            <polygon points="-136,-30 -60,-100 -20,-100 -136,10"/>
-            <polygon points="-60,102 136,-80 136,-40 0,102"/>
-            <polygon points="60,102 136,30 136,60 100,102"/>
-          </g>
-          <rect x="-6" y="-114" width="62" height="7" rx="3.5" fill="#fff" opacity=".92"/>
-          <g transform="translate(-136 -100)" class="ui">
-            <circle cx="136" cy="40" r="21" fill="#e8661a"/>
-            <circle cx="136" cy="34.5" r="5.5" fill="none" stroke="#fff8ee" stroke-width="2"/>
-            <path d="M126.5 50.5 a9.5 8.5 0 0 1 19 0" fill="none" stroke="#fff8ee" stroke-width="2" stroke-linecap="round"/>
-            <text x="58" y="90" font-size="6.6" font-weight="600" letter-spacing=".6" fill="#5a2e0e">USERNAME</text>
-            <text x="58" y="119" font-size="6.6" font-weight="600" letter-spacing=".6" fill="#5a2e0e">PASSWORD</text>
-            <rect x="104" y="80" width="110" height="15" rx="7.5" fill="#fff" stroke="#ebcfa6" stroke-width=".8"/>
-            <text x="114" y="90.4" font-size="6.2" fill="#b9a690">JA37heDevil</text>
-            <rect x="104" y="109" width="100" height="15" rx="7.5" fill="#fff" stroke="#ebcfa6" stroke-width=".8"/>
-            <g fill="#3a1d08">
-              <circle cx="114" cy="116.5" r="1.6"/><circle cx="120" cy="116.5" r="1.6"/>
-              <circle cx="126" cy="116.5" r="1.6"/><circle cx="132" cy="116.5" r="1.6"/>
-              <circle cx="138" cy="116.5" r="1.6"/><circle cx="144" cy="116.5" r="1.6"/>
-              <circle cx="150" cy="116.5" r="1.6"/><circle cx="156" cy="116.5" r="1.6"/>
-              <circle cx="162" cy="116.5" r="1.6"/>
-            </g>
-            <path d="M190 116.5 q5 -5 10 0 q-5 5 -10 0z" fill="none" stroke="#b9a690" stroke-width="1"/>
-            <circle cx="195" cy="116.5" r="1.4" fill="#b9a690"/>
-            <rect x="209" y="109" width="27" height="15" rx="7.5" fill="#e8661a"/>
-            <path d="M220.5 113 l4 3.5 l-4 3.5" fill="none" stroke="#fff8ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            <text x="112" y="136" font-size="5" fill="#5a2e0e" opacity=".9">Don&#39;t Have An Account Yet ? <tspan font-weight="800" fill="#d9560f" opacity="1">Sign Up</tspan></text>
-            <rect x="102" y="142.5" width="7" height="7" rx="1.5" fill="#e8661a"/>
-            <path d="M103.8 146 l1.6 1.6 l2.6 -3" fill="none" stroke="#fff8ee" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
-            <text x="113" y="148.3" font-size="5" fill="#5a2e0e" opacity=".9">Remember Me</text>
+          <g transform="translate(404 352) rotate(4)">
+            <rect width="124" height="94" rx="14" fill="#f3dcc0"/>
+            <circle cx="18" cy="16" r="4" fill="#b4440b"/><circle cx="32" cy="16" r="4" fill="#7a5a44"/>
+            <rect x="16" y="38" width="90" height="10" rx="4" fill="#d9bb96"/>
+            <rect x="16" y="58" width="70" height="10" rx="4" fill="#d9bb96"/>
           </g>
         </g>
+
+        <!-- laptop keyboard edge -->
+        <rect x="0" y="476" width="520" height="44" fill="#1c0d05"/>
+        <rect x="0" y="482" width="520" height="38" fill="url(#art-keys)"/>
+        <rect x="0" y="474" width="520" height="4" fill="#4a200a"/>
+
+        <ellipse cx="268" cy="330" rx="170" ry="150" fill="#e8661a" opacity=".28" filter="url(#art-glow)"/>
+
+        <!-- fishing line and the back half of the hook (it threads through the card) -->
+        <line x1="300" y1="-4" x2="300" y2="111" stroke="#e9d3b5" stroke-width="2"/>
         <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="302" y1="-4" x2="309" y2="50" stroke="#2a1608" stroke-width="1.6"/>
-          <circle cx="311" cy="58" r="8.5" stroke="#2a1608" stroke-width="3.6"/>
-          <path d="M309 67 L303 140 C301 168 270 172 263 150 L258 124" stroke="#2a1608" stroke-width="5.2"/>
-          <path d="M309 67 L303 140 C301 168 270 172 263 150 L258 124" stroke="#7a5a44" stroke-width="1.2" transform="translate(-1 -1)"/>
-          <path d="M258 124 L255 116 L266 134 Z" fill="#2a1608" stroke="#2a1608" stroke-width="2"/>
+          <path d="M300 129 V170 C300 205 250 210 240 188 L232 158" stroke="#d8c3a5" stroke-width="7"/>
+          <path d="M232 158 l-8 12 M232 158 l11 9" stroke="#d8c3a5" stroke-width="5"/>
         </g>
-        <g transform="translate(413 184)">
-          <circle r="57" fill="url(#darkBall)"/>
-          <g clip-path="url(#c57)">
-            <text transform="rotate(7) scale(1 1.1)" x="6" y="11" text-anchor="middle" font-size="32" letter-spacing="-.5" fill="#fff4e2" class="heavy">HACKED!</text>
-            <circle r="57" fill="url(#rimDark)"/>
+
+        <!-- the login card -->
+        <g transform="translate(267 325) rotate(-6)">
+          <rect x="-125" y="-142" width="250" height="300" rx="22" fill="#c9965f"/>
+          <rect x="-125" y="-150" width="250" height="300" rx="22" fill="#fffaf2" stroke="#f0dcc0" stroke-width="2"/>
+          <circle cx="0" cy="-127" r="9" fill="#2b1608" stroke="#ecd6b6" stroke-width="2"/>
+
+          <circle cx="0" cy="-70" r="34" fill="#e8661a"/>
+          <circle cx="0" cy="-80" r="10" fill="#fff8ee"/>
+          <path d="M-17 -50 a17 14 0 0 1 34 0z" fill="#fff8ee"/>
+
+          <g class="ui">
+            <rect x="-100" y="-20" width="200" height="34" rx="10" fill="#fbf0e0" stroke="#ecd6b6" stroke-width="1.5"/>
+            <circle cx="-82" cy="-8" r="4.5" fill="#7a5a44"/>
+            <path d="M-89.5 6 a7.5 6.5 0 0 1 15 0z" fill="#7a5a44"/>
+            <text x="-66" y="2" font-size="13" fill="#7a5a44">Username</text>
+
+            <rect x="-100" y="24" width="200" height="42" rx="10" fill="#fbf0e0" stroke="#ecd6b6" stroke-width="1.5"/>
+            <path d="M-87 42 v-4 a5 5 0 0 1 10 0 v4" fill="none" stroke="#7a5a44" stroke-width="2.4"/>
+            <rect x="-89" y="41" width="14" height="11" rx="2.5" fill="#7a5a44"/>
+            <text x="-66" y="39" font-size="10" fill="#7a5a44">Password</text>
+            <g fill="#2b1608">
+              <circle cx="-62" cy="53" r="3"/><circle cx="-52" cy="53" r="3"/><circle cx="-42" cy="53" r="3"/><circle cx="-32" cy="53" r="3"/>
+              <circle cx="-22" cy="53" r="3"/><circle cx="-12" cy="53" r="3"/><circle cx="-2" cy="53" r="3"/><circle cx="8" cy="53" r="3"/>
+            </g>
+            <path d="M72 45 q9 -8 18 0 q-9 8 -18 0z" fill="none" stroke="#7a5a44" stroke-width="1.8"/>
+            <circle cx="81" cy="45" r="2.6" fill="#7a5a44"/>
+
+            <rect x="-100" y="78" width="200" height="36" rx="10" fill="#b4440b"/>
+            <text x="0" y="101" font-size="14.5" font-weight="700" fill="#ffffff" text-anchor="middle">Sign in</text>
+
+            <rect x="-100" y="126" width="13" height="13" rx="3" fill="#b4440b"/>
+            <path d="M-97 132.5 l3 3 l5 -6" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="-81" y="137" font-size="11" fill="#2b1608">Remember me</text>
+            <text x="100" y="137" font-size="11" font-weight="600" fill="#b4440b" text-anchor="end">Forgot password?</text>
           </g>
-          <ellipse cx="-22" cy="-30" rx="16" ry="8" transform="rotate(-35 -22 -30)" fill="#fff" opacity=".35" filter="url(#soft)"/>
         </g>
-        <g transform="translate(88 340)">
-          <circle r="48" fill="url(#darkBall)"/>
-          <g clip-path="url(#c48)">
-            <text transform="rotate(-12)" x="-4" y="22" text-anchor="middle" font-size="62" fill="#fff4e2" class="heavy">!</text>
-            <circle r="48" fill="url(#rimDark)"/>
-          </g>
-          <ellipse cx="-18" cy="-24" rx="13" ry="7" transform="rotate(-35 -18 -24)" fill="#fff" opacity=".35" filter="url(#soft)"/>
+
+        <!-- front half of the hook, from the shank down into the card's hole -->
+        <path d="M300 129 V170 C300 196 270 203 254 198" fill="none" stroke="#d8c3a5" stroke-width="7" stroke-linecap="round"/>
+        <path d="M300 132 V168" fill="none" stroke="#fff4e2" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+        <circle cx="300" cy="120" r="9" fill="none" stroke="#d8c3a5" stroke-width="4"/>
+
+        <!-- spark marks -->
+        <g stroke="#ff9a4d" stroke-width="6" stroke-linecap="round">
+          <line x1="240" y1="98" x2="228" y2="76"/>
+          <line x1="256" y1="90" x2="258" y2="66"/>
+          <line x1="270" y1="100" x2="286" y2="84"/>
         </g>
-        <g transform="translate(366 416)">
-          <circle r="60" fill="url(#creamBall)"/>
-          <g clip-path="url(#c60)">
-            <text transform="rotate(-4)" x="-8" y="28" text-anchor="middle" font-size="82" fill="#e0611a" class="heavy">!</text>
-            <circle r="60" fill="url(#rimCream)"/>
+
+        <!-- HACKED sign -->
+        <g transform="translate(122 132) rotate(-8)">
+          <rect x="-96" y="-25" width="192" height="68" rx="14" fill="#7a2a06"/>
+          <rect x="-96" y="-34" width="192" height="68" rx="14" fill="#2b1608" stroke="#e8661a" stroke-width="4"/>
+          <text class="heavy" x="0" y="13" font-size="34" fill="#fff4e2" text-anchor="middle" textLength="156" lengthAdjust="spacingAndGlyphs">HACKED</text>
+        </g>
+
+        <!-- skull badge -->
+        <g transform="translate(424 258) rotate(10)">
+          <rect x="-55" y="-46" width="110" height="110" rx="22" fill="#7a2a06"/>
+          <rect x="-55" y="-55" width="110" height="110" rx="22" fill="#2b1608" stroke="#e8661a" stroke-width="4"/>
+          <g stroke="#fff4e2" stroke-width="8" stroke-linecap="round">
+            <line x1="-32" y1="22" x2="32" y2="42"/>
+            <line x1="32" y1="22" x2="-32" y2="42"/>
           </g>
-          <ellipse cx="20" cy="-22" rx="14" ry="9" fill="#fff" opacity=".75" filter="url(#soft)"/>
+          <g fill="#fff4e2">
+            <circle cx="-34" cy="20" r="6"/><circle cx="-34" cy="44" r="6"/><circle cx="34" cy="20" r="6"/><circle cx="34" cy="44" r="6"/>
+            <circle cx="0" cy="-12" r="25"/>
+            <rect x="-14" y="2" width="28" height="18" rx="5"/>
+          </g>
+          <g fill="#2b1608">
+            <circle cx="-10" cy="-12" r="7"/><circle cx="10" cy="-12" r="7"/>
+            <path d="M0 -2 l-4 7 h8z"/>
+            <rect x="-6" y="13" width="3" height="7"/><rect x="3" y="13" width="3" height="7"/>
+          </g>
+        </g>
+
+        <!-- warning signs -->
+        <g transform="translate(92 402) rotate(-10)">
+          <path d="M0 -50 L58 48 H-58 Z" fill="#9a3108" stroke="#9a3108" stroke-width="20" stroke-linejoin="round" transform="translate(0 9)"/>
+          <path d="M0 -50 L58 48 H-58 Z" fill="#e8661a" stroke="#e8661a" stroke-width="20" stroke-linejoin="round"/>
+          <rect x="-7" y="-24" width="14" height="44" rx="7" fill="#fff4e2"/>
+          <circle cx="0" cy="34" r="8" fill="#fff4e2"/>
+        </g>
+        <g transform="translate(446 412) rotate(8) scale(.6)">
+          <path d="M0 -50 L58 48 H-58 Z" fill="#9a3108" stroke="#9a3108" stroke-width="20" stroke-linejoin="round" transform="translate(0 9)"/>
+          <path d="M0 -50 L58 48 H-58 Z" fill="#e8661a" stroke="#e8661a" stroke-width="20" stroke-linejoin="round"/>
+          <rect x="-7" y="-24" width="14" height="44" rx="7" fill="#fff4e2"/>
+          <circle cx="0" cy="34" r="8" fill="#fff4e2"/>
         </g>
       </g>
     </svg>
   </div>
 </header>
 
-<main class="wrap">
-  <section class="result" id="result" aria-live="polite">
+<main>
+<section class="checker wrap" id="checker" aria-labelledby="checker-title">
+  <div class="checker-card">
+    <h2 id="checker-title">Check a link or message</h2>
+    <p class="checker-sub">Paste one link, or a whole email or text. We&rsquo;ll pull out every link inside it.</p>
+    <form class="check-form" id="check-form" novalidate>
+      <label class="sr-only" for="url-input">Link or message to check</label>
+      <textarea id="url-input" name="url" rows="3" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://example.com/login, or paste the full email or text" aria-describedby="url-error url-hint form-note"></textarea>
+      <div class="form-actions">
+        <button class="btn btn-primary btn-check" type="submit" id="check-btn">Check for phishing</button>
+        <span class="hint" id="url-hint">Enter to check, Shift+Enter for a new line.</span>
+      </div>
+      <p class="form-note" id="form-note">Your text is checked in your browser and never stored. Only each website&rsquo;s domain name (like <code>example.com</code>) is sent to our server, to look up its age. <a href="privacy.html">Privacy Policy</a></p>
+      <p class="form-error" id="url-error" role="alert"></p>
+      <div class="examples" id="examples">
+        <span>Try an example:</span>
+        <button type="button" class="chip-ex chip-msg" data-url="USPS: Your package is on hold due to an incomplete address. Update your details within 24 hours: https://usps-redelivery-help.top/track?id=US9514 or visit www.usps.com for more info. Reply STOP to opt out.">A delivery text</button>
+        <button type="button" class="chip-ex" data-url="http://paypa1-secure-login.xyz/verify/account">paypa1-secure-login.xyz</button>
+        <button type="button" class="chip-ex" data-url="https://accounts.google.com.security-check.top/signin?continue=https://mail.google.com">google.com.security-check.top</button>
+        <button type="button" class="chip-ex" data-url="https://www.paypal.com/signin">www.paypal.com</button>
+      </div>
+    </form>
+  </div>
+
+  <p class="sr-only" id="live" aria-live="polite"></p>
+  <section class="result" id="result" aria-label="Check result" hidden>
     <div class="linklist" id="linklist" hidden>
       <p class="ll-title" id="ll-title"></p>
       <div class="ll-items" id="ll-items"></div>
@@ -578,17 +812,42 @@
       <div>
         <h2>Get a second opinion</h2>
         <div class="deeper">
-          <a id="lnk-google" href="https://transparencyreport.google.com/safe-browsing/search" target="_blank" rel="noopener noreferrer">Google Safe Browsing</a>
-          <a id="lnk-vt" href="https://www.virustotal.com/gui/home/url" target="_blank" rel="noopener noreferrer">VirusTotal scan</a>
+          <a id="lnk-google" href="https://transparencyreport.google.com/safe-browsing/search" target="_blank" rel="noopener noreferrer">Check on Google Safe Browsing</a>
+          <a id="lnk-vt" href="https://www.virustotal.com/gui/home/url" target="_blank" rel="noopener noreferrer">Scan on VirusTotal</a>
         </div>
         <p class="deeper-cap">These buttons send the link to that service so it can check it against reported phishing sites. Nothing is sent unless you click one.</p>
       </div>
     </div>
   </section>
-</main>
+</section>
 
-<section class="guide wrap" aria-labelledby="guide-title">
-  <h2 id="guide-title">What to do with a suspicious link</h2>
+<section class="section wrap" id="how" aria-labelledby="how-title">
+  <div class="sec-head">
+    <h2 id="how-title">A clear answer in three steps</h2>
+  </div>
+  <ol class="steps">
+    <li>
+      <span class="step-num" aria-hidden="true">1</span>
+      <h3>Paste it</h3>
+      <p>A single link, or a whole email or text message. Every link inside gets checked.</p>
+    </li>
+    <li>
+      <span class="step-num" aria-hidden="true">2</span>
+      <h3>We inspect it</h3>
+      <p>Fake brand names, misspellings, hidden addresses, risky endings, and how many days old the website is.</p>
+    </li>
+    <li>
+      <span class="step-num" aria-hidden="true">3</span>
+      <h3>Get the verdict</h3>
+      <p>A risk score, who really owns the link, and each warning sign in plain English.</p>
+    </li>
+  </ol>
+</section>
+
+<section class="section guide wrap" id="guide" aria-labelledby="guide-title">
+  <div class="sec-head">
+    <h2 id="guide-title">What to do with a suspicious link</h2>
+  </div>
   <div class="guide-grid">
     <div>
       <h3>Before you click</h3>
@@ -617,8 +876,65 @@
   </div>
 </section>
 
-<footer>
-  <div class="wrap">Hook Check reads links in your browser. The only thing sent anywhere is the bare domain name, to look up when it was registered. Messages you paste never leave your device. A low score means no common warning signs, not a guarantee of safety.</div>
+<section class="cta-band wrap" aria-labelledby="cta-title">
+  <div class="cta-box">
+    <div>
+      <h2 id="cta-title">Got a suspicious message right now?</h2>
+      <p>Don&rsquo;t click it. Paste it into Hook Check first. It takes seconds and it&rsquo;s free.</p>
+    </div>
+    <div class="cta-actions">
+      <a class="btn btn-light btn-lg" href="#checker" data-focus-checker>Check a link</a>
+      <button type="button" class="btn btn-ghost btn-lg js-share-site">Share Hook Check</button>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href="#top">
+          <svg viewBox="0 0 32 32" aria-hidden="true">
+            <circle cx="16" cy="16" r="15" fill="#e8661a"/>
+            <path d="M19 6v12a5 5 0 0 1-10 0v-3" fill="none" stroke="#fff8ee" stroke-width="3" stroke-linecap="round"/>
+            <path d="M9 15l-2.6 3.4M9 15l2.6 3.4" stroke="#fff8ee" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+          Hook Check
+        </a>
+        <p>A free tool that spots the warning signs in suspicious links before you click. Messages you paste never leave your device. Only the bare domain name is sent, to look up when it was registered.</p>
+      </div>
+      <div>
+        <h3>Product</h3>
+        <ul>
+          <li><a href="#checker" data-focus-checker>Check a link</a></li>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#guide">What to do</a></li>
+          <li><button type="button" class="link-btn js-share-site">Share Hook Check</button></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Report a scam</h3>
+        <ul>
+          <li><a href="https://safebrowsing.google.com/safebrowsing/report_phish/" target="_blank" rel="noopener noreferrer">Report to Google</a></li>
+          <li><a href="https://apwg.org/report-phishing/" target="_blank" rel="noopener noreferrer">Report to APWG</a></li>
+          <li><a href="https://www.virustotal.com/" target="_blank" rel="noopener noreferrer">Scan on VirusTotal</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Learn</h3>
+        <ul>
+          <li><a href="https://consumer.ftc.gov/articles/how-recognize-and-avoid-phishing-scams" target="_blank" rel="noopener noreferrer">Spotting phishing (FTC)</a></li>
+          <li><a href="https://www.ncsc.gov.uk/collection/phishing-scams" target="_blank" rel="noopener noreferrer">Phishing guide (NCSC)</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; 2026 Hook Check</span>
+      <span><a href="privacy.html">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="cookies.html">Cookie Policy</a> &nbsp;&middot;&nbsp; <a href="terms.html">Terms of Use</a></span>
+      <span>A low score means no common warning signs, not a guarantee of safety.</span>
+    </div>
+  </div>
 </footer>
 
 <script>
@@ -765,13 +1081,18 @@
       if (hit) {
         add("high", 35, "Uses the " + hit.name + " name on a site " + hit.name + " doesn't own", hit.name + "'s real addresses end in " + hit.domains.slice(0, 3).join(", ") + ". This link belongs to " + parts.reg + ".");
       } else {
-        var variants = [deleet(label, "l"), deleet(label, "i")];
+        // Test the whole name and each word in it, so paypa1-secure-login is caught as well as paypa1
+        var pieces = [label].concat(words.filter(function (w) { return w.length >= 4; }));
         var typo = null;
         for (var b2 = 0; b2 < BRANDS.length && !typo; b2++) {
           for (var t2 = 0; t2 < BRANDS[b2].tokens.length; t2++) {
             var tk = BRANDS[b2].tokens[t2];
             if (tk.length < 4) continue;
-            if (variants.indexOf(tk) !== -1 || (tk.length >= 6 && lev(label, tk) === 1) || (tk.length >= 8 && lev(label, tk) === 2)) { typo = BRANDS[b2]; break; }
+            var looksLike = pieces.some(function (p) {
+              return deleet(p, "l") === tk || deleet(p, "i") === tk ||
+                (tk.length >= 6 && lev(p, tk) === 1) || (tk.length >= 8 && lev(p, tk) === 2);
+            });
+            if (looksLike) { typo = BRANDS[b2]; break; }
           }
         }
         if (typo) {
@@ -861,18 +1182,8 @@
 
   var ageCache = {};
 
-  function rdapDirect(domain) {
-    return fetch("https://rdap.org/domain/" + encodeURIComponent(domain)).then(function (res) {
-      if (res.status === 404) return { notFound: true };
-      if (!res.ok) throw new Error("rdap " + res.status);
-      return res.json().then(function (d) {
-        var ev = (d.events || []).filter(function (e) { return e.eventAction === "registration"; })[0];
-        return { registered: ev ? ev.eventDate : null };
-      });
-    });
-  }
-
-  // Prefer our own /api function (deployed on Vercel); fall back to asking RDAP from the browser
+  // Only our own /api function is asked, so visitors' browsers never contact a third party.
+  // Opened as a local file there is no /api, and the report says the age couldn't be checked.
   function lookupAge(domain) {
     if (ageCache[domain]) return ageCache[domain];
     var api = /^https?:$/.test(location.protocol)
@@ -881,8 +1192,7 @@
           return res.json();
         })
       : Promise.reject(new Error("no api"));
-    ageCache[domain] = api.catch(function () { return rdapDirect(domain); })
-      .catch(function () { return { failed: true }; });
+    ageCache[domain] = api.catch(function () { return { failed: true }; });
     return ageCache[domain];
   }
 
@@ -976,6 +1286,7 @@
       btn.setAttribute("aria-pressed", i === state.selected ? "true" : "false");
       btn.setAttribute("data-index", i);
       btn.appendChild(span("sev sev-" + (v.level === "low" ? "good" : v.level), String(v.score)));
+      btn.appendChild(span("sr-only", " risk, " + TITLES[v.level] + ": "));
       var c = document.createElement("code");
       c.textContent = it.result.input;
       btn.appendChild(c);
@@ -1015,7 +1326,7 @@
 
     var list = $("findings");
     list.textContent = "";
-    var labels = { high: "HIGH", med: "MED", low: "LOW", good: "OK", wait: "..." };
+    var labels = { high: "HIGH", med: "MED", low: "LOW", good: "OK", wait: "WAIT" };
     v.findings.forEach(function (f) {
       var li = document.createElement("li");
       var body = document.createElement("div");
@@ -1033,6 +1344,21 @@
     var enc = encodeURIComponent(r.input);
     $("lnk-google").href = "https://transparencyreport.google.com/safe-browsing/search?url=" + enc;
     $("lnk-vt").href = "https://www.virustotal.com/gui/search/" + encodeURIComponent(enc);
+  }
+
+  // Screen readers hear a short summary instead of the whole report being re-read on every update
+  function announce(msg) {
+    var live = $("live");
+    live.textContent = "";
+    setTimeout(function () { live.textContent = msg; }, 60);
+  }
+
+  function announceVerdict() {
+    var item = state.items[state.selected];
+    if (!item) return;
+    var v = view(item);
+    var many = state.items.length > 1 ? "Found " + state.items.length + " links. Showing " + item.result.input + ". " : "";
+    announce(many + TITLES[v.level] + ", " + v.score + " out of 100 risk. " + v.findings.length + " findings.");
   }
 
   function renderAll() {
@@ -1071,10 +1397,12 @@
     $("share-status").textContent = "";
     $("share-out").hidden = true;
     state.items = items;
+    $("result").hidden = false;
     state.token++;
     state.selected = 0;
     items.forEach(function (it, idx) { if (it.result.score > items[state.selected].result.score) state.selected = idx; });
     renderAll();
+    announceVerdict();
 
     var token = state.token;
     items.forEach(function (it) {
@@ -1083,6 +1411,10 @@
         if (token !== state.token) return;
         it.age = info;
         renderAll();
+        if (it === state.items[state.selected]) {
+          var a = ageFinding(info, it.result.parts.reg);
+          if (a) announce(a.title + ". Risk is now " + view(it).score + " out of 100.");
+        }
       });
     });
     return true;
@@ -1126,7 +1458,51 @@
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
-    if (run() && window.innerWidth < 860) $("result").scrollIntoView({ behavior: "smooth", block: "start" });
+    if (run()) $("result").scrollIntoView({ block: "start" });
+  });
+
+  // Tell screen-reader users which links open a new tab
+  document.querySelectorAll('a[target="_blank"]').forEach(function (a) {
+    a.appendChild(span("sr-only", " (opens in a new tab)"));
+  });
+
+  // Buttons that lead to the checker also put the cursor in the box
+  document.querySelectorAll("[data-focus-checker]").forEach(function (a) {
+    a.addEventListener("click", function () {
+      setTimeout(function () { input.focus({ preventScroll: true }); }, 450);
+    });
+  });
+
+  var menuBtn = $("menu-btn"), navLinks = $("nav-links");
+  function setMenu(open) {
+    menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    menuBtn.textContent = open ? "Close" : "Menu";
+    navLinks.classList.toggle("open", open);
+  }
+  menuBtn.addEventListener("click", function () { setMenu(menuBtn.getAttribute("aria-expanded") !== "true"); });
+  navLinks.addEventListener("click", function (e) { if (e.target.closest("a")) setMenu(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") setMenu(false); });
+
+  document.querySelectorAll(".js-share-site").forEach(function (btn) {
+    var label = btn.textContent;
+    btn.addEventListener("click", function () {
+      var site = location.href.split(/[?#]/)[0];
+      var text = "Before you click a suspicious link, check it here. It's free:";
+      var coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+      if (navigator.share && coarse) {
+        navigator.share({ title: "Hook Check", text: text, url: site }).catch(function () {});
+        return;
+      }
+      function done(msg) {
+        btn.textContent = msg;
+        setTimeout(function () { btn.textContent = label; }, 2200);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text + " " + site).then(function () { done("Link copied"); }, function () { done(site); });
+      } else {
+        done(site);
+      }
+    });
   });
   input.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
@@ -1139,20 +1515,23 @@
     var btn = e.target.closest("[data-url]");
     if (!btn) return;
     input.value = btn.getAttribute("data-url");
-    run();
+    if (run()) $("result").scrollIntoView({ block: "start" });
   });
   $("ll-items").addEventListener("click", function (e) {
     var btn = e.target.closest("[data-index]");
     if (!btn) return;
     state.selected = Number(btn.getAttribute("data-index"));
     renderAll();
+    announceVerdict();
   });
 
-  // A shared link (?check=...) opens straight on its result; otherwise show a worked example
+  // A shared link (?check=...) opens straight on its result; otherwise start with an empty box
   var shared = null;
   try { shared = new URLSearchParams(location.search).get("check"); } catch (e) {}
-  input.value = shared || "USPS: Your package is on hold due to an incomplete address. Update your details within 24 hours: https://usps-redelivery-help.top/track?id=US9514 or visit www.usps.com for more info. Reply STOP to opt out.";
-  run();
+  if (shared) {
+    input.value = shared;
+    run();
+  }
 })();
 </script>
 </body>
