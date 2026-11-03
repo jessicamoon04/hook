@@ -27,8 +27,14 @@ async function registryFor(tld) {
 }
 
 module.exports = async function handler(req, res) {
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    res.setHeader("Allow", "GET, HEAD");
+    res.status(405).json({ error: "Method not allowed" });
+    return;
+  }
   const domain = String((req.query && req.query.domain) || "").trim().toLowerCase();
-  if (!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(domain) || domain.length > 253) {
+  // The ending must contain a letter, which also turns away IP addresses like 169.254.169.254
+  if (!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(domain) || domain.length > 253 || !/[a-z]/.test(domain.split(".").pop())) {
     res.status(400).json({ error: "Invalid domain" });
     return;
   }
