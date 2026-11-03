@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hook Check</title>
 <meta name="description" content="Paste a suspicious link, email or text message and see whether it shows the signs of a phishing scam, including how new the website is.">
-<meta property="og:title" content="Hook Check: is that link a trap?">
-<meta property="og:description" content="Paste a suspicious link, email or text and see the warning signs before you click.">
+<meta property="og:title" content="Hook Check: Don't get trapped again">
+<meta property="og:description" content="Paste a link, email or text to check it before you click.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://hook-neon-nu.vercel.app/">
 <meta property="og:image" content="https://hook-neon-nu.vercel.app/og-image.png">
@@ -136,15 +136,28 @@
     z-index: 31;
     background: var(--band-a);
   }
+  /* Transparent over the hero so the two read as one block; turns solid once the page scrolls */
   .nav {
     position: sticky;
     top: env(safe-area-inset-top, 0px);
     z-index: 30;
-    background: var(--band-a);
+    background: transparent;
     color: var(--on-band);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, .12), 0 8px 24px rgba(90, 30, 0, .18);
+    transition: background-color .2s ease, box-shadow .2s ease;
   }
-  .nav .wrap { display: flex; align-items: center; gap: 28px; min-height: 66px; position: relative; }
+  .nav.scrolled, .nav.menu-open {
+    background: var(--band-a);
+    box-shadow: 0 8px 24px rgba(90, 30, 0, .18);
+  }
+  .nav .wrap {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 24px;
+    min-height: 66px;
+    position: relative;
+  }
+  .nav-actions { justify-self: end; display: flex; align-items: center; gap: 10px; }
   .brand {
     display: flex;
     align-items: center;
@@ -153,7 +166,7 @@
     font-stretch: 108%;
     color: var(--on-band);
     text-decoration: none;
-    margin-right: auto;
+    justify-self: start;
   }
   .brand svg { width: 32px; height: 32px; flex: none; }
   .nav-links { display: flex; gap: 26px; list-style: none; margin: 0; padding: 0; }
@@ -177,20 +190,15 @@
   .hero {
     background: radial-gradient(120% 90% at 75% 30%, var(--band-b), var(--band-a));
     color: var(--on-band);
+    /* slide up behind the 66px nav so its background shows through the transparent bar */
+    margin-top: -66px;
   }
   .hero .wrap {
     display: grid;
     grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
     gap: 48px;
     align-items: center;
-    padding-block: 64px 150px;
-  }
-  .eyebrow {
-    font: 600 13px/1 var(--body);
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--on-band-soft);
-    margin: 0 0 18px;
+    padding-block: 130px 150px;
   }
   h1 {
     font-family: var(--display);
@@ -209,17 +217,16 @@
     max-width: 26em;
     margin: 0 0 32px;
   }
-  .hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
-  .trust { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14.5px; font-weight: 600; color: var(--on-band-soft); }
-  .trust li::before { content: "\2713"; margin-right: 7px; color: var(--on-band); }
+  .hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; }
   .art {
     width: 100%;
     max-width: 460px;
     height: auto;
     display: block;
     justify-self: center;
-    border-radius: 22px;
-    box-shadow: 0 30px 60px rgba(90, 30, 0, .4);
+    overflow: visible;
+    /* follows each shape's outline, so the card and badges cast shadows without a box around them */
+    filter: drop-shadow(0 18px 24px rgba(60, 20, 0, .35));
   }
   .art .ui { font-family: var(--body); }
   .art .heavy { font-family: var(--display); font-weight: 900; }
@@ -538,10 +545,10 @@
     .nav-links.open { display: flex; }
     .nav-links a { display: block; padding: 12px 0; font-size: 16px; }
     .menu-btn { display: block; }
-    .nav .wrap { gap: 10px; }
+    .nav .wrap { grid-template-columns: 1fr auto; gap: 10px; }
   }
   @media (max-width: 860px) {
-    .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 36px; padding-block: 44px 136px; }
+    .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 36px; padding-block: 110px 136px; }
     .art { max-width: 340px; }
     .result { grid-template-columns: minmax(0, 1fr); }
     .verdict { border-right: 0; border-bottom: 1px solid var(--line); }
@@ -583,45 +590,41 @@
       <li><a href="#how">How it works</a></li>
       <li><a href="#guide">What to do</a></li>
     </ul>
-    <a class="btn btn-light" href="#checker" data-focus-checker>Check a link</a>
-    <button class="menu-btn" type="button" id="menu-btn" aria-expanded="false" aria-controls="nav-links">Menu</button>
+    <div class="nav-actions">
+      <a class="btn btn-light" href="#checker" data-focus-checker>Check a link</a>
+      <button class="menu-btn" type="button" id="menu-btn" aria-expanded="false" aria-controls="nav-links">Menu</button>
+    </div>
   </div>
 </nav>
 
 <header class="hero" id="top">
   <div class="wrap">
     <div>
-      <p class="eyebrow">Free phishing link checker</p>
-      <h1>Is that link a trap?</h1>
-      <p class="lede">Paste a link, email or text. See who really owns each link and what looks wrong, before you click.</p>
+      <h1>Don&rsquo;t get trapped again.</h1>
+      <p class="lede">Paste a link, email or text to check it before you click.</p>
       <div class="hero-ctas">
         <a class="btn btn-light btn-lg" href="#checker" data-focus-checker>Check a link now</a>
         <a class="btn btn-ghost btn-lg" href="#how">How it works</a>
       </div>
-      <ul class="trust">
-        <li>Free, no sign-up</li>
-        <li>Checks website age</li>
-        <li>Messages stay on your device</li>
-      </ul>
     </div>
 
     <svg class="art" viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A login card hangs from a fishing hook like bait, surrounded by a HACKED sign, a skull badge and warning signs.">
       <defs>
         <clipPath id="art-frame"><rect width="520" height="520" rx="28"/></clipPath>
-        <radialGradient id="art-bg" cx="58%" cy="34%" r="80%">
-          <stop offset="0" stop-color="#7a3410"/><stop offset=".55" stop-color="#4a200a"/><stop offset="1" stop-color="#2b1608"/>
+        <!-- fades the background windows out towards the edges so they melt into the hero -->
+        <radialGradient id="art-fade-grad" cx="50%" cy="50%" r="50%">
+          <stop offset=".45" stop-color="#fff"/><stop offset="1" stop-color="#000"/>
         </radialGradient>
-        <pattern id="art-keys" width="36" height="16" patternUnits="userSpaceOnUse">
-          <rect x="3" y="3" width="30" height="10" rx="3" fill="#2e170a"/>
-        </pattern>
+        <mask id="art-fade"><rect width="520" height="520" fill="url(#art-fade-grad)"/></mask>
+        <linearGradient id="art-line" x1="0" y1="0" x2="0" y2="110" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#e9d3b5" stop-opacity="0"/><stop offset="1" stop-color="#e9d3b5"/>
+        </linearGradient>
         <filter id="art-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>
         <filter id="art-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="30"/></filter>
       </defs>
       <g clip-path="url(#art-frame)">
-        <rect width="520" height="520" fill="url(#art-bg)"/>
-
         <!-- faded windows in the background -->
-        <g filter="url(#art-blur)" opacity=".32">
+        <g filter="url(#art-blur)" mask="url(#art-fade)" opacity=".3">
           <g transform="translate(40 52) rotate(-4)">
             <rect width="150" height="92" rx="14" fill="#f3dcc0"/>
             <circle cx="18" cy="16" r="4" fill="#b4440b"/><circle cx="32" cy="16" r="4" fill="#7a5a44"/><circle cx="46" cy="16" r="4" fill="#7a5a44"/>
@@ -648,15 +651,10 @@
           </g>
         </g>
 
-        <!-- laptop keyboard edge -->
-        <rect x="0" y="476" width="520" height="44" fill="#1c0d05"/>
-        <rect x="0" y="482" width="520" height="38" fill="url(#art-keys)"/>
-        <rect x="0" y="474" width="520" height="4" fill="#4a200a"/>
-
         <ellipse cx="268" cy="330" rx="170" ry="150" fill="#e8661a" opacity=".28" filter="url(#art-glow)"/>
 
         <!-- fishing line and the back half of the hook (it threads through the card) -->
-        <line x1="300" y1="-4" x2="300" y2="111" stroke="#e9d3b5" stroke-width="2"/>
+        <line x1="300" y1="0" x2="300" y2="111" stroke="url(#art-line)" stroke-width="2"/>
         <g fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path d="M300 129 V170 C300 205 250 210 240 188 L232 158" stroke="#d8c3a5" stroke-width="7"/>
           <path d="M232 158 l-8 12 M232 158 l11 9" stroke="#d8c3a5" stroke-width="5"/>
@@ -947,7 +945,7 @@
     { name: "PayPal", tokens: ["paypal"], domains: ["paypal.com", "paypal.me"] },
     { name: "Apple", tokens: ["apple", "icloud", "appleid"], domains: ["apple.com", "icloud.com"] },
     { name: "Microsoft", tokens: ["microsoft", "outlook", "office365", "hotmail", "onedrive"], domains: ["microsoft.com", "live.com", "outlook.com", "office.com", "microsoftonline.com", "office365.com", "onedrive.com", "hotmail.com"] },
-    { name: "Google", tokens: ["google", "gmail"], domains: ["google.com", "gmail.com", "youtube.com", "goo.gl", "google.co.uk"] },
+    { name: "Google", tokens: ["google", "gmail"], domains: ["google.com", "gmail.com", "youtube.com", "goo.gl", "google.co.uk", "google.com.ng", "google.com.gh", "google.co.ke", "google.co.za", "google.co.in", "google.ca", "google.de", "google.fr", "google.com.au"] },
     { name: "Amazon", tokens: ["amazon"], domains: ["amazon.com", "amazon.co.uk", "amazon.de", "amazon.in", "amazon.ca", "amazon.com.au", "amazon.co.jp", "amazon.fr"] },
     { name: "Facebook", tokens: ["facebook"], domains: ["facebook.com", "fb.com", "meta.com"] },
     { name: "Instagram", tokens: ["instagram"], domains: ["instagram.com"] },
@@ -969,7 +967,19 @@
     { name: "Dropbox", tokens: ["dropbox"], domains: ["dropbox.com"] },
     { name: "DocuSign", tokens: ["docusign"], domains: ["docusign.com", "docusign.net"] }
   ];
-  var MULTI_SUFFIX = ["co.uk", "org.uk", "gov.uk", "ac.uk", "com.au", "net.au", "co.nz", "co.jp", "co.in", "com.br", "com.mx", "co.za", "com.cn", "com.sg", "com.tr", "com.ng"];
+  var MULTI_SUFFIX = ["co.uk", "org.uk", "gov.uk", "ac.uk", "com.au", "net.au", "co.nz", "co.jp", "co.in", "com.br", "com.mx", "co.za", "com.cn", "com.sg", "com.tr",
+    "com.ng", "org.ng", "gov.ng", "edu.ng", "net.ng", "com.gh", "co.ke", "co.tz", "co.ug", "com.eg"];
+  // Pages on these official addresses can be made by anyone with a free account
+  var USER_CONTENT_HOSTS = ["sites.google.com", "docs.google.com", "drive.google.com", "script.google.com", "forms.office.com", "sway.office.com", "onedrive.live.com"];
+  // Brand names that are also everyday words: only count them as a whole word, never inside a longer one
+  var WHOLE_WORD_TOKENS = ["outlook"];
+  // Cyrillic and Greek letters that look the same as Latin ones, used to spell fake brand names
+  var CONFUSABLES = {
+    "а": "a", "е": "e", "о": "o", "р": "p", "с": "c", "у": "y", "х": "x",
+    "і": "i", "ј": "j", "ѕ": "s", "һ": "h", "ԁ": "d", "ԛ": "q", "ԝ": "w",
+    "ӏ": "l", "к": "k", "ɡ": "g", "α": "a", "ο": "o", "ρ": "p", "ν": "v",
+    "ι": "i", "κ": "k", "υ": "u", "ε": "e"
+  };
   var SHORTENERS = ["bit.ly", "tinyurl.com", "t.co", "goo.gl", "is.gd", "ow.ly", "cutt.ly", "rebrand.ly", "shorturl.at", "tiny.cc", "rb.gy", "buff.ly", "t.ly", "s.id", "v.gd"];
   var FREE_HOSTS = ["000webhostapp.com", "weebly.com", "wixsite.com", "firebaseapp.com", "web.app", "pages.dev", "netlify.app", "vercel.app", "github.io", "glitch.me", "repl.co", "blogspot.com", "herokuapp.com", "ngrok.io", "ngrok-free.app", "workers.dev", "square.site", "godaddysites.com", "webflow.io", "r2.dev", "ipfs.io", "framer.website"];
   var SUS_TLDS = ["zip", "mov", "xyz", "top", "tk", "ml", "ga", "cf", "gq", "click", "link", "work", "rest", "cam", "icu", "buzz", "monster", "sbs", "cfd", "country", "kim", "quest", "lol", "support", "cyou", "bond"];
@@ -1006,26 +1016,96 @@
     return host === d || host.slice(-(d.length + 1)) === "." + d;
   }
 
-  // Pull every link out of a pasted email or text message
+  function safeDecode(s) {
+    try { return decodeURIComponent(s); } catch (e) { return s; }
+  }
+
+  // Punycode (RFC 3492): turns an "xn--" label back into the letters it really spells
+  function punyDecode(input) {
+    var base = 36, tMin = 1, tMax = 26, skew = 38, damp = 700;
+    var n = 128, bias = 72, i = 0, output = [];
+    var basic = input.lastIndexOf("-");
+    for (var j = 0; j < basic; j++) output.push(input.charCodeAt(j));
+    for (var idx = basic > 0 ? basic + 1 : 0; idx < input.length;) {
+      var oldi = i, w = 1;
+      for (var k = base; ; k += base) {
+        if (idx >= input.length) throw new Error("bad punycode");
+        var c = input.charCodeAt(idx++);
+        var digit = c >= 48 && c < 58 ? c - 22 : c >= 65 && c < 91 ? c - 65 : c >= 97 && c < 123 ? c - 97 : base;
+        if (digit >= base) throw new Error("bad punycode");
+        i += digit * w;
+        var t = k <= bias ? tMin : k >= bias + tMax ? tMax : k - bias;
+        if (digit < t) break;
+        w *= base - t;
+      }
+      var len = output.length + 1;
+      var delta = oldi === 0 ? Math.floor((i - oldi) / damp) : (i - oldi) >> 1;
+      delta += Math.floor(delta / len);
+      var kk = 0;
+      for (; delta > ((base - tMin) * tMax) >> 1; kk += base) delta = Math.floor(delta / (base - tMin));
+      bias = Math.floor(kk + ((base - tMin + 1) * delta) / (delta + skew));
+      n += Math.floor(i / len);
+      i %= len;
+      output.splice(i++, 0, n);
+    }
+    return String.fromCodePoint.apply(null, output);
+  }
+
+  function readableHost(host) {
+    return host.split(".").map(function (l) {
+      if (l.slice(0, 4) !== "xn--") return l;
+      try { return punyDecode(l.slice(4)); } catch (e) { return l; }
+    }).join(".");
+  }
+
+  // What a name spells once accents are dropped and look-alike letters are swapped for the Latin ones they imitate
+  function skeleton(s) {
+    s = s.normalize("NFD").replace(/[̀-ͯ]/g, "");
+    var out = "";
+    for (var i = 0; i < s.length; i++) out += CONFUSABLES[s[i]] || s[i];
+    return out;
+  }
+
+  // Pull every link out of a pasted email or text message.
+  // It works one word at a time, so a huge or hostile paste can't make the page hang.
+  var BARE_HOST = /^[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+(?::\d{2,5})?(?:[\/?#].*)?$/u;
   function extractLinks(text) {
     var out = [], seen = {};
-    var re = /((?:https?:\/\/|www\.)[^\s<>"'`]+|\b(?:[a-z0-9-]+\.)+[a-z]{2,24}(?::\d{2,5})?(?:\/[^\s<>"'`]*)?)/gi;
-    var m;
-    while ((m = re.exec(text)) && out.length < MAX_LINKS) {
-      var s = m[1];
-      if (m.index > 0 && text.charAt(m.index - 1) === "@") continue;
-      s = s.replace(/[.,;:!?)\]}'"]+$/, "");
-      if (!/^(https?:\/\/|www\.)/i.test(s)) {
+    var tokens = text.split(/\s+/);
+    for (var i = 0; i < tokens.length && out.length < MAX_LINKS; i++) {
+      var s = tokens[i];
+      if (!s || s.length > 2048) continue;
+      var at = s.search(/https?:\/\/|www\./i);
+      if (at >= 0) {
+        s = s.slice(at).split(/[<>"'`]/)[0];
+      } else {
+        s = s.replace(/^[(<\["'`]+/, "");
+        if (s.indexOf("@") !== -1) continue; // an email address, not a link
+      }
+      s = s.replace(/[.,;:!?)\]}>'"`]+$/, "");
+      if (at < 0) {
+        if (!BARE_HOST.test(s)) continue;
         var tld = s.split(/[\/:?#]/)[0].split(".").pop().toLowerCase();
         if (BARE_TLDS.indexOf(tld) === -1) continue;
       }
+      if (s.length < 4) continue;
       var key = s.toLowerCase();
       if (!seen[key]) { seen[key] = true; out.push(s); }
     }
     return out;
   }
 
-  function analyze(raw) {
+  // Brand names mentioned in the page path of a site the brand doesn't own
+  function pathMention(url) {
+    var pathText = (url.pathname + url.search).toLowerCase();
+    for (var b = 0; b < BRANDS.length; b++) {
+      var inPath = BRANDS[b].tokens.filter(function (x) { return x.length >= 5 && pathText.indexOf(x) !== -1; });
+      if (inPath.length) return { brand: BRANDS[b], token: inPath[0] };
+    }
+    return null;
+  }
+
+  function analyze(raw, depth) {
     var input = raw.trim();
     if (!input) return { error: "Paste a link to check it." };
 
@@ -1070,21 +1150,30 @@
       add("high", 25, "Look-alike letters in the name", "The address uses foreign letters that can look identical to normal ones, such as a Cyrillic \"a\". Its raw form is " + host + ".");
     }
 
+    // Brand checks read the name as it looks on screen, so Cyrillic look-alikes of "paypal" count as "paypal"
+    var lookHost = isIP ? host : skeleton(readableHost(host));
+    var lookLabel = isIP ? label : skeleton(readableHost(label));
+    var disguised = lookHost !== host;
+
     if (!isIP && !official) {
-      var words = host.split(/[.-]/);
-      var flat = host.replace(/[.-]/g, "");
+      var words = lookHost.split(/[.-]/);
+      var flat = lookHost.replace(/[.-]/g, "");
       var hit = null;
       for (var b = 0; b < BRANDS.length && !hit; b++) {
         for (var t = 0; t < BRANDS[b].tokens.length; t++) {
           var tok = BRANDS[b].tokens[t];
-          if (tok.length < 5 ? words.indexOf(tok) !== -1 : flat.indexOf(tok) !== -1) { hit = BRANDS[b]; break; }
+          // Short names (apple, chase) must be a whole word, so pineapple.com and purchase.com don't match
+          var wholeWord = tok.length < 6 || WHOLE_WORD_TOKENS.indexOf(tok) !== -1;
+          if (wholeWord ? words.indexOf(tok) !== -1 : flat.indexOf(tok) !== -1) { hit = BRANDS[b]; break; }
         }
       }
       if (hit) {
-        add("high", 35, "Uses the " + hit.name + " name on a site " + hit.name + " doesn't own", hit.name + "'s real addresses end in " + hit.domains.slice(0, 3).join(", ") + ". This link belongs to " + parts.reg + ".");
+        add("high", 35,
+          disguised ? "Spells " + hit.name + " with look-alike letters" : "Uses the " + hit.name + " name on a site " + hit.name + " doesn't own",
+          hit.name + "'s real addresses end in " + hit.domains.slice(0, 3).join(", ") + ". This link belongs to " + parts.reg + ".");
       } else {
         // Test the whole name and each word in it, so paypa1-secure-login is caught as well as paypa1
-        var pieces = [label].concat(words.filter(function (w) { return w.length >= 4; }));
+        var pieces = [lookLabel].concat(words.filter(function (w) { return w.length >= 4; }));
         var typo = null;
         for (var b2 = 0; b2 < BRANDS.length && !typo; b2++) {
           for (var t2 = 0; t2 < BRANDS[b2].tokens.length; t2++) {
@@ -1100,16 +1189,18 @@
         if (typo) {
           add("high", 35, "Misspelled copy of " + typo.name, "\"" + parts.reg + "\" imitates " + typo.domains[0] + ". Swapping one letter or number is a classic phishing trick.");
         } else {
-          var pathText = (url.pathname + url.search).toLowerCase();
-          for (var b3 = 0; b3 < BRANDS.length; b3++) {
-            var inPath = BRANDS[b3].tokens.filter(function (x) { return x.length >= 5 && pathText.indexOf(x) !== -1; });
-            if (inPath.length) {
-              add("med", 12, "Mentions " + BRANDS[b3].name + " on someone else's site", "The address includes \"" + inPath[0] + "\", but the site is " + parts.reg + ". Fake brand pages often do this.");
-              break;
-            }
-          }
+          var pm = pathMention(url);
+          if (pm) add("med", 12, "Mentions " + pm.brand.name + " on someone else's site", "The address includes \"" + pm.token + "\", but the site is " + parts.reg + ". Fake brand pages often do this.");
         }
       }
+    }
+
+    // Official addresses where anyone can publish: Google Sites, Google Forms, OneDrive and similar
+    var userContent = !!official && USER_CONTENT_HOSTS.indexOf(host) !== -1;
+    if (userContent) {
+      add("med", 15, "Anyone can publish pages here", host + " belongs to " + official.name + ", but anyone with a free account can make pages, forms and files on it. Scammers use it because the address looks trustworthy.");
+      var upm = pathMention(url);
+      if (upm && upm.brand !== official) add("med", 12, "Mentions " + upm.brand.name + " on a page anyone could have made", "The address includes \"" + upm.token + "\". " + upm.brand.name + " doesn't run its pages on " + host + ".");
     }
 
     if (SHORTENERS.indexOf(parts.reg) !== -1 || SHORTENERS.indexOf(host) !== -1) {
@@ -1129,7 +1220,8 @@
     if (subCount >= 3) {
       add("med", 10, "Long chain of extra names", "Extra words before the real domain push the owner out of view, especially on a phone. The real domain here is " + parts.reg + ".");
     }
-    var hyphens = (label.match(/-/g) || []).length;
+    // Count on the readable name: "xn--" encodings add hyphens and digits the visitor never sees
+    var hyphens = (lookLabel.match(/-/g) || []).length;
     if (hyphens >= 2) {
       add("low", 8, "Several hyphens in the domain", "Names like secure-account-update are a common phishing pattern.");
     }
@@ -1141,7 +1233,20 @@
     if (found.length) {
       add(found.length >= 3 ? "med" : "low", Math.min(4 * found.length, 16), "Pressure words in the address", "Contains " + found.map(function (k) { return "\"" + k + "\""; }).join(", ") + ". Phishing links pile these on to look official.");
     }
-    if (/=(https?:|https?%3a)/i.test(url.search)) {
+    // A second address inside the link is where a redirect really sends you, so check that one too
+    var redirectsAway = false;
+    var targetRaw = null;
+    url.searchParams.forEach(function (v) { if (!targetRaw && /^https?:\/\//i.test(v)) targetRaw = v; });
+    if (targetRaw) {
+      var inner = depth ? null : analyze(targetRaw, 1);
+      if (inner && !inner.error && !inner.special && inner.parts.reg !== parts.reg) {
+        redirectsAway = true;
+        add(inner.score >= 20 ? "high" : "med", 15 + Math.round(inner.score / 2),
+          "Forwards you to " + inner.parts.reg,
+          "After you click, this link can send you on to " + inner.parts.reg + ", a different site" +
+          (inner.score >= 20 ? " that has its own warning signs (" + inner.score + "/100 on its own)." : ". Check that address on its own."));
+      }
+    } else if (/=(https?:|https?%3a)/i.test(url.search)) {
       add("med", 10, "Carries a second web address", "The link contains another address inside it and may bounce you somewhere else after you click.");
     }
     if (url.pathname.indexOf("//") !== -1) {
@@ -1150,7 +1255,7 @@
     if (input.length > 100) {
       add("low", 6, "Very long link", "Long links make the real domain hard to spot.");
     }
-    if ((label.match(/\d/g) || []).length >= 4) {
+    if ((lookLabel.match(/\d/g) || []).length >= 4) {
       add("low", 5, "Lots of numbers in the domain", "Randomly generated names like this are common on throwaway scam sites.");
     }
     if ((input.match(/%[0-9a-f]{2}/gi) || []).length > 5) {
@@ -1163,7 +1268,8 @@
       add("med", 12, "No secure connection", "This link uses http://, so anything you type travels unencrypted. Sign-in and payment pages always use https://.");
     }
 
-    if (official) {
+    // Only a plain official address earns the discount; not one anyone can publish on, or one that forwards elsewhere
+    if (official && !userContent && !redirectsAway) {
       score = Math.max(0, score - 25);
       add("good", 0, "Official " + official.name + " address", parts.reg + " belongs to " + official.name + ". Still check that you expected this message.");
     }
@@ -1194,7 +1300,10 @@
           return res.json();
         })
       : Promise.reject(new Error("no api"));
-    ageCache[domain] = api.catch(function () { return { failed: true }; });
+    ageCache[domain] = api.catch(function () {
+      delete ageCache[domain]; // don't remember a failure, so the next check tries again
+      return { failed: true };
+    });
     return ageCache[domain];
   }
 
@@ -1315,7 +1424,7 @@
     } else {
       var u = r.url;
       if (!r.noScheme) an.appendChild(span("a-muted", u.protocol + "//"));
-      if (u.username || u.password) an.appendChild(span("a-bad", decodeURIComponent(u.username) + (u.password ? ":***" : "") + "@"));
+      if (u.username || u.password) an.appendChild(span("a-bad", safeDecode(u.username) + (u.password ? ":***" : "") + "@"));
       if (r.parts.sub) an.appendChild(span("a-muted", r.parts.sub + "."));
       an.appendChild(span("a-owner", r.parts.reg));
       if (u.port) an.appendChild(span("a-muted", ":" + u.port));
@@ -1475,12 +1584,18 @@
     });
   });
 
-  var menuBtn = $("menu-btn"), navLinks = $("nav-links");
+  var menuBtn = $("menu-btn"), navLinks = $("nav-links"), nav = document.querySelector(".nav");
   function setMenu(open) {
     menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
     menuBtn.textContent = open ? "Close" : "Menu";
     navLinks.classList.toggle("open", open);
+    nav.classList.toggle("menu-open", open);
   }
+
+  // The nav sits see-through on the hero and turns solid once the page has scrolled
+  function updateNav() { nav.classList.toggle("scrolled", window.scrollY > 8); }
+  window.addEventListener("scroll", updateNav, { passive: true });
+  updateNav();
   menuBtn.addEventListener("click", function () { setMenu(menuBtn.getAttribute("aria-expanded") !== "true"); });
   navLinks.addEventListener("click", function (e) { if (e.target.closest("a")) setMenu(false); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") setMenu(false); });
