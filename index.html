@@ -15,7 +15,7 @@
 <meta property="og:image:alt" content="Hook Check: is that link a trap? A phishing link marked Likely phishing.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://hook-neon-nu.vercel.app/og-image.png">
-<meta name="theme-color" content="#9a3108">
+<meta name="theme-color" content="#1f0f06">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-48.png" type="image/png" sizes="48x48">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -30,8 +30,22 @@
     --muted: #7a5a44;
     --line: #ecdcc4;
     --accent: #b4440b;
-    --band-a: #9a3108;
-    --band-b: #c2410c;
+    /* Dark warm hero: deep chocolate, so orange is only an accent (buttons, one headline word, a glow behind the art) */
+    --band-a: #1f0f06;
+    --band-b: #3a1c0b;
+    --hero-accent: #ee7428;
+    --hero-glow: rgba(238, 116, 40, .30);
+    --on-accent: #1f0f06;
+    /* deep brown for the closing band, so the orange hero is the one bold moment */
+    --deep: #3b1d0b;
+    /* Frosted glass. Opacities are the lowest that keep grey text at 4.5:1 over the darkest colour that can show through:
+       90% for the checker card (it overlaps the dark hero), 60% for cards on cream, 12% for the background glow */
+    --glass: rgba(255, 250, 242, .6);
+    --glass-strong: rgba(255, 250, 242, .9);
+    --glass-edge: rgba(255, 255, 255, .7);
+    --glass-shadow: 0 20px 50px rgba(90, 40, 10, .12);
+    --glow-a: rgba(232, 102, 26, .12);
+    --glow-b: rgba(255, 176, 102, .16);
     --on-band: #fff8ee;
     --on-band-soft: #ffeedd;
     --btn-bg: #fff4e2;
@@ -47,14 +61,17 @@
     --foot-ink: #fbf3e6;
     --foot-muted: #c9ab92;
     --foot-line: #4a2c17;
-    --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
-    --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    /* Instrument Serif has one weight (400): headings get their presence from size, never faux bold */
+    --display: "Instrument Serif", Georgia, "Times New Roman", serif;
+    --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
     --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #160c05; --surface: #22140a; --ink: #f8ebdc; --muted: #c4a58a;
-      --line: #3a2615; --accent: #ff9a4d; --band-a: #7a2b05; --band-b: #b8470f;
+      --line: #3a2615; --accent: #ff9a4d; --band-a: #140904; --band-b: #2a1408; --deep: #241005;
+      --glass: rgba(34, 20, 10, .6); --glass-strong: rgba(34, 20, 10, .86); --glass-edge: rgba(255, 255, 255, .08);
+      --glass-shadow: 0 20px 50px rgba(0, 0, 0, .35); --glow-a: rgba(232, 102, 26, .10); --glow-b: rgba(184, 71, 15, .12);
       --danger: #ff8a7a; --danger-bg: #36181a; --warn: #f2a93b; --warn-bg: #36260b; --ok: #45d08f; --ok-bg: #0f2d20;
       --accent-ink: #2b1608; --foot-bg: #0c0603; --foot-ink: #f8ebdc; --foot-muted: #b39579; --foot-line: #2a1a0e;
       color-scheme: dark;
@@ -62,7 +79,9 @@
   }
   :root[data-theme="dark"] {
     --bg: #160c05; --surface: #22140a; --ink: #f8ebdc; --muted: #c4a58a;
-    --line: #3a2615; --accent: #ff9a4d; --band-a: #7a2b05; --band-b: #b8470f;
+    --line: #3a2615; --accent: #ff9a4d; --band-a: #140904; --band-b: #2a1408; --deep: #241005;
+    --glass: rgba(34, 20, 10, .6); --glass-strong: rgba(34, 20, 10, .86); --glass-edge: rgba(255, 255, 255, .08);
+    --glass-shadow: 0 20px 50px rgba(0, 0, 0, .35); --glow-a: rgba(232, 102, 26, .10); --glow-b: rgba(184, 71, 15, .12);
     --danger: #ff8a7a; --danger-bg: #36181a; --warn: #f2a93b; --warn-bg: #36260b; --ok: #45d08f; --ok-bg: #0f2d20;
       --accent-ink: #2b1608; --foot-bg: #0c0603; --foot-ink: #f8ebdc; --foot-muted: #b39579; --foot-line: #2a1a0e;
     color-scheme: dark;
@@ -120,8 +139,19 @@
   .btn-lg { font-size: 17px; padding: 16px 28px; }
   .btn-light { background: var(--btn-bg); color: var(--btn-ink); box-shadow: 0 6px 18px rgba(90, 30, 0, .28); }
   .btn-light:hover { background: #ffffff; }
-  .btn-ghost { background: transparent; color: var(--on-band); border-color: rgba(255, 255, 255, .55); }
-  .btn-ghost:hover { background: rgba(255, 255, 255, .12); }
+  .btn-ghost {
+    background: rgba(255, 255, 255, .1);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    color: var(--on-band);
+    border-color: rgba(255, 255, 255, .45);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2);
+  }
+  .btn-ghost:hover { background: rgba(255, 255, 255, .18); }
+  /* orange call-to-action on the dark hero and nav; dark text because white on this orange is under 4.5:1 */
+  .btn-glow { background: var(--hero-accent); color: var(--on-accent); box-shadow: 0 8px 26px rgba(238, 116, 40, .35); }
+  .btn-glow:hover { filter: brightness(1.08); }
+  h1 em { font-style: italic; color: var(--hero-accent); }
   .btn-primary { background: var(--accent); color: var(--accent-ink); }
   .btn-primary:hover { filter: brightness(1.08); }
   .btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
@@ -136,6 +166,18 @@
     z-index: 31;
     background: var(--band-a);
   }
+  /* Soft warm light behind the cream sections, so the glass panels have something to frost */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(40% 35% at 10% 70%, var(--glow-a), transparent 70%),
+      radial-gradient(35% 30% at 92% 85%, var(--glow-b), transparent 70%),
+      radial-gradient(30% 25% at 88% 35%, var(--glow-a), transparent 70%);
+  }
   /* Transparent over the hero so the two read as one block; turns solid once the page scrolls */
   .nav {
     position: sticky;
@@ -145,9 +187,12 @@
     color: var(--on-band);
     transition: background-color .2s ease, box-shadow .2s ease;
   }
+  /* frosted orange: 90% keeps the links at 4.5:1 even with cream showing through */
   .nav.scrolled, .nav.menu-open {
-    background: var(--band-a);
-    box-shadow: 0 8px 24px rgba(90, 30, 0, .18);
+    background: color-mix(in srgb, var(--band-a) 90%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    backdrop-filter: blur(14px) saturate(150%);
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .14), 0 8px 24px rgba(90, 30, 0, .14);
   }
   .nav .wrap {
     display: grid;
@@ -162,8 +207,8 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font: 800 19px/1 var(--display);
-    font-stretch: 108%;
+    font: 700 19px/1 var(--body);
+    letter-spacing: -.01em;
     color: var(--on-band);
     text-decoration: none;
     justify-self: start;
@@ -188,7 +233,9 @@
 
   /* ---------- hero ---------- */
   .hero {
-    background: radial-gradient(120% 90% at 75% 30%, var(--band-b), var(--band-a));
+    background:
+      radial-gradient(38% 50% at 76% 46%, var(--hero-glow), transparent 70%),
+      radial-gradient(140% 110% at 72% 28%, var(--band-b), var(--band-a));
     color: var(--on-band);
     /* slide up behind the 66px nav so its background shows through the transparent bar */
     margin-top: -66px;
@@ -202,11 +249,10 @@
   }
   h1 {
     font-family: var(--display);
-    font-stretch: 112%;
-    font-weight: 850;
-    font-size: clamp(46px, 7vw, 80px);
+    font-weight: 400;
+    font-size: clamp(54px, 8.4vw, 100px);
     line-height: .95;
-    letter-spacing: -.025em;
+    letter-spacing: -.02em;
     margin: 0 0 20px;
     text-wrap: balance;
   }
@@ -229,18 +275,20 @@
     filter: drop-shadow(0 18px 24px rgba(60, 20, 0, .35));
   }
   .art .ui { font-family: var(--body); }
-  .art .heavy { font-family: var(--display); font-weight: 900; }
+  .art .heavy { font-family: var(--body); font-weight: 700; }
 
   /* ---------- checker ---------- */
   .checker { margin-top: -96px; position: relative; padding-bottom: 24px; }
   .checker-card {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 20px;
+    background: var(--glass-strong);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    backdrop-filter: blur(22px) saturate(140%);
+    border: 1px solid var(--glass-edge);
+    border-radius: 24px;
     padding: 32px;
-    box-shadow: 0 22px 48px rgba(90, 40, 10, .14);
+    box-shadow: inset 0 1px 0 var(--glass-edge), var(--glass-shadow);
   }
-  .checker-card h2 { font: 800 clamp(24px, 3vw, 30px)/1.1 var(--display); font-stretch: 108%; margin: 0 0 6px; }
+  .checker-card h2 { font: 400 clamp(32px, 3.8vw, 40px)/1.05 var(--display); letter-spacing: -.01em; margin: 0 0 6px; }
   .checker-sub { margin: 0 0 18px; color: var(--muted); }
   .check-form { display: grid; gap: 12px; }
   .check-form textarea {
@@ -288,15 +336,17 @@
 
   /* ---------- result ---------- */
   .result {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 18px;
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    backdrop-filter: blur(22px) saturate(140%);
+    border: 1px solid var(--glass-edge);
+    border-radius: 24px;
     display: grid;
     grid-template-columns: 300px minmax(0, 1fr);
     overflow: hidden;
     margin-top: 20px;
     position: relative;
-    box-shadow: 0 18px 40px rgba(90, 40, 10, .1);
+    box-shadow: inset 0 1px 0 var(--glass-edge), var(--glass-shadow);
   }
   .linklist {
     grid-column: 1 / -1;
@@ -344,10 +394,9 @@
   }
   .v-title {
     font-family: var(--display);
-    font-stretch: 110%;
-    font-weight: 850;
-    font-size: 34px;
-    line-height: 1;
+    font-weight: 400;
+    font-size: 44px;
+    line-height: .95;
     color: var(--v, var(--ok));
     margin: 0;
   }
@@ -459,22 +508,29 @@
   .sec-head { max-width: 40em; margin-bottom: 32px; }
   .sec-head h2 {
     font-family: var(--display);
-    font-stretch: 110%;
-    font-weight: 800;
-    font-size: clamp(30px, 3.8vw, 42px);
-    line-height: 1.04;
+    font-weight: 400;
+    font-size: clamp(38px, 4.8vw, 56px);
+    line-height: 1;
     letter-spacing: -.015em;
     margin: 0 0 12px;
     text-wrap: balance;
   }
   .sec-head p { margin: 0; color: var(--muted); font-size: 17px; }
   .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-  .steps li { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px; }
+  .steps li {
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid var(--glass-edge);
+    border-radius: 22px;
+    padding: 26px;
+    box-shadow: inset 0 1px 0 var(--glass-edge), 0 12px 32px rgba(90, 40, 10, .08);
+  }
   .step-num {
     width: 40px; height: 40px; border-radius: 50%;
     display: grid; place-items: center;
     background: var(--accent); color: var(--accent-ink);
-    font: 800 17px/1 var(--display);
+    font: 400 22px/1 var(--display);
     margin-bottom: 16px;
   }
   .steps h3 { font-size: 19px; margin: 0 0 6px; }
@@ -486,10 +542,15 @@
 
   /* ---------- CTA band ---------- */
   .cta-band { padding-block: 72px; }
+  /* dark glass: nearly solid so the cream text keeps its contrast, with a light top edge */
   .cta-box {
-    background: radial-gradient(120% 140% at 85% 20%, var(--band-b), var(--band-a));
+    background: color-mix(in srgb, var(--deep) 94%, transparent);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, .08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 24px 60px rgba(43, 22, 8, .25);
     color: var(--on-band);
-    border-radius: 24px;
+    border-radius: 28px;
     padding: 48px;
     display: flex;
     flex-wrap: wrap;
@@ -498,7 +559,7 @@
     gap: 28px;
   }
   .cta-box > div:first-child { min-width: 0; flex: 1 1 360px; }
-  .cta-box h2 { font: 800 clamp(28px, 3.6vw, 40px)/1.05 var(--display); font-stretch: 110%; margin: 0 0 10px; text-wrap: balance; }
+  .cta-box h2 { font: 400 clamp(36px, 4.6vw, 54px)/1 var(--display); letter-spacing: -.01em; margin: 0 0 10px; text-wrap: balance; }
   .cta-box p { margin: 0; color: var(--on-band-soft); font-size: 17px; max-width: 32em; }
   .cta-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 
@@ -591,7 +652,7 @@
       <li><a href="#guide">What to do</a></li>
     </ul>
     <div class="nav-actions">
-      <a class="btn btn-light" href="#checker" data-focus-checker>Check a link</a>
+      <a class="btn btn-glow" href="#checker" data-focus-checker>Check a link</a>
       <button class="menu-btn" type="button" id="menu-btn" aria-expanded="false" aria-controls="nav-links">Menu</button>
     </div>
   </div>
@@ -600,10 +661,10 @@
 <header class="hero" id="top">
   <div class="wrap">
     <div>
-      <h1>Don&rsquo;t get trapped again.</h1>
+      <h1>Don&rsquo;t get <em>trapped</em> again.</h1>
       <p class="lede">Paste a link, email or text to check it before you click.</p>
       <div class="hero-ctas">
-        <a class="btn btn-light btn-lg" href="#checker" data-focus-checker>Check a link now</a>
+        <a class="btn btn-glow btn-lg" href="#checker" data-focus-checker>Check a link now</a>
         <a class="btn btn-ghost btn-lg" href="#how">How it works</a>
       </div>
     </div>
@@ -738,16 +799,16 @@
 
         <!-- warning signs -->
         <g transform="translate(92 402) rotate(-10)">
-          <path d="M0 -50 L58 48 H-58 Z" fill="#9a3108" stroke="#9a3108" stroke-width="20" stroke-linejoin="round" transform="translate(0 9)"/>
-          <path d="M0 -50 L58 48 H-58 Z" fill="#e8661a" stroke="#e8661a" stroke-width="20" stroke-linejoin="round"/>
-          <rect x="-7" y="-24" width="14" height="44" rx="7" fill="#fff4e2"/>
-          <circle cx="0" cy="34" r="8" fill="#fff4e2"/>
+          <path d="M0 -50 L58 48 H-58 Z" fill="#c98a4a" stroke="#c98a4a" stroke-width="20" stroke-linejoin="round" transform="translate(0 9)"/>
+          <path d="M0 -50 L58 48 H-58 Z" fill="#ffe2b8" stroke="#ffe2b8" stroke-width="20" stroke-linejoin="round"/>
+          <rect x="-7" y="-24" width="14" height="44" rx="7" fill="#2b1608"/>
+          <circle cx="0" cy="34" r="8" fill="#2b1608"/>
         </g>
         <g transform="translate(446 412) rotate(8) scale(.6)">
-          <path d="M0 -50 L58 48 H-58 Z" fill="#9a3108" stroke="#9a3108" stroke-width="20" stroke-linejoin="round" transform="translate(0 9)"/>
-          <path d="M0 -50 L58 48 H-58 Z" fill="#e8661a" stroke="#e8661a" stroke-width="20" stroke-linejoin="round"/>
-          <rect x="-7" y="-24" width="14" height="44" rx="7" fill="#fff4e2"/>
-          <circle cx="0" cy="34" r="8" fill="#fff4e2"/>
+          <path d="M0 -50 L58 48 H-58 Z" fill="#c98a4a" stroke="#c98a4a" stroke-width="20" stroke-linejoin="round" transform="translate(0 9)"/>
+          <path d="M0 -50 L58 48 H-58 Z" fill="#ffe2b8" stroke="#ffe2b8" stroke-width="20" stroke-linejoin="round"/>
+          <rect x="-7" y="-24" width="14" height="44" rx="7" fill="#2b1608"/>
+          <circle cx="0" cy="34" r="8" fill="#2b1608"/>
         </g>
       </g>
     </svg>
@@ -883,7 +944,7 @@
       <p>Don&rsquo;t click it. Paste it into Hook Check first. It takes seconds and it&rsquo;s free.</p>
     </div>
     <div class="cta-actions">
-      <a class="btn btn-light btn-lg" href="#checker" data-focus-checker>Check a link</a>
+      <a class="btn btn-glow btn-lg" href="#checker" data-focus-checker>Check a link</a>
       <button type="button" class="btn btn-ghost btn-lg js-share-site">Share Hook Check</button>
     </div>
   </div>

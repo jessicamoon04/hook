@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Terms of Use | Hook Check</title>
 <meta name="description" content="The terms for using Hook Check, the phishing link checker.">
-<meta name="theme-color" content="#9a3108">
+<meta name="theme-color" content="#1f0f06">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-48.png" type="image/png" sizes="48x48">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -14,23 +14,23 @@
   /* Layout: same nav bar and footer as the checker, with a single readable column of terms */
   :root {
     --bg: #fbf3e6; --surface: #fffaf2; --ink: #2b1608; --muted: #7a5a44; --line: #ecdcc4;
-    --accent: #b4440b; --band-a: #9a3108; --on-band: #fff8ee; --on-band-soft: #ffe6cc;
-    --btn-bg: #fff4e2; --btn-ink: #b33c08; --fill: #fff1d9; --fill-ink: #7a3d00;
+    --accent: #b4440b; --band-a: #1f0f06; --on-band: #fff8ee; --on-band-soft: #ffe6cc;
+    --btn-bg: #ee7428; --btn-ink: #1f0f06; --fill: #fff1d9; --fill-ink: #7a3d00;
     --foot-bg: #2b1608; --foot-ink: #fbf3e6; --foot-muted: #c9ab92; --foot-line: #4a2c17;
-    --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
-    --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --display: "Instrument Serif", Georgia, "Times New Roman", serif;
+    --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #160c05; --surface: #22140a; --ink: #f8ebdc; --muted: #c4a58a; --line: #3a2615;
-      --accent: #ff9a4d; --band-a: #7a2b05; --fill: #36260b; --fill-ink: #f2c27a;
+      --accent: #ff9a4d; --band-a: #140904; --fill: #36260b; --fill-ink: #f2c27a;
       --foot-bg: #0c0603; --foot-ink: #f8ebdc; --foot-muted: #b39579; --foot-line: #2a1a0e;
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
     --bg: #160c05; --surface: #22140a; --ink: #f8ebdc; --muted: #c4a58a; --line: #3a2615;
-    --accent: #ff9a4d; --band-a: #7a2b05; --fill: #36260b; --fill-ink: #f2c27a;
+    --accent: #ff9a4d; --band-a: #140904; --fill: #36260b; --fill-ink: #f2c27a;
     --foot-bg: #0c0603; --foot-ink: #f8ebdc; --foot-muted: #b39579; --foot-line: #2a1a0e;
     color-scheme: dark;
   }
@@ -43,16 +43,16 @@
   }
   .nav { background: var(--band-a); color: var(--on-band); }
   .nav .wrap { display: flex; align-items: center; gap: 16px; min-height: 66px; }
-  .brand { display: flex; align-items: center; gap: 10px; font: 800 19px/1 var(--display); font-stretch: 108%; color: inherit; text-decoration: none; margin-right: auto; }
+  .brand { display: flex; align-items: center; gap: 10px; font: 700 19px/1 var(--body); letter-spacing: -.01em; color: inherit; text-decoration: none; margin-right: auto; }
   .brand svg { width: 32px; height: 32px; flex: none; }
   .btn { font: 700 14.5px/1.2 var(--body); text-decoration: none; border-radius: 12px; padding: 10px 16px; background: var(--btn-bg); color: var(--btn-ink); }
-  .btn:hover { background: #ffffff; }
+  .btn:hover { filter: brightness(1.08); }
   .brand:focus-visible, .btn:focus-visible { outline: 2px solid var(--on-band); outline-offset: 3px; }
   main { padding-block: 56px 72px; }
   .doc { max-width: 68ch; }
-  h1 { font: 850 clamp(36px, 5vw, 52px)/1.02 var(--display); font-stretch: 110%; letter-spacing: -.02em; margin: 0 0 12px; }
+  h1 { font: 400 clamp(46px, 6.4vw, 68px)/1 var(--display); letter-spacing: -.02em; margin: 0 0 12px; }
   .updated { color: var(--muted); margin: 0 0 36px; }
-  h2 { font: 800 24px/1.2 var(--display); font-stretch: 106%; margin: 40px 0 10px; }
+  h2 { font: 400 32px/1.1 var(--display); margin: 40px 0 10px; }
   p, li { margin: 0 0 14px; }
   ul { padding-left: 22px; margin: 0 0 14px; }
   a { color: var(--accent); }
