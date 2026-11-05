@@ -1,6 +1,7 @@
 {
   "functions": {
-    "api/domain-age.js": { "maxDuration": 15 }
+    "api/domain-age.js": { "maxDuration": 15 },
+    "api/expand.js": { "maxDuration": 25 }
   },
   "headers": [
     {

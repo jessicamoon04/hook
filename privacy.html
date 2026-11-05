@@ -88,13 +88,14 @@
 <main class="wrap">
   <article class="doc">
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: 2 November 2026</p>
+    <p class="updated">Last updated: 5 November 2026</p>
 
     <div class="summary">
       <p><strong>The short version:</strong></p>
       <ul>
-        <li>Messages and links you paste are checked in your browser. We never receive them.</li>
+        <li>Messages and links you paste are checked in your browser. We never receive your messages.</li>
         <li>To check a website&rsquo;s age, only its bare domain name (for example <code>example.com</code>) is looked up.</li>
+        <li>Short links (for example <code>bit.ly/abc</code>) are sent to our server so it can ask the short-link service where they lead.</li>
         <li>We don&rsquo;t use cookies, analytics, advertising or accounts.</li>
       </ul>
     </div>
@@ -103,12 +104,16 @@
     <p>Hook Check is run by Big Chi. If you have a question about this policy or your data, email <a href="mailto:jotesbychicollections@gmail.com">jotesbychicollections@gmail.com</a>.</p>
 
     <h2>What you paste into the checker</h2>
-    <p>When you paste a link, email or text message, the checking happens inside your own browser. The text is not sent to us, not stored, and is gone when you close or reload the page.</p>
+    <p>When you paste a link, email or text message, the checking happens inside your own browser, including the check for scam wording in messages. The text is not sent to us, not stored, and is gone when you close or reload the page. The only exceptions are the domain names and short links described below.</p>
 
     <h2>Website age lookups</h2>
     <p>To tell you how old a website is, Hook Check sends only the domain name (for example <code>example.com</code>, never the full link or your message) to our server function. That function asks the public registration lookup service (RDAP) run by the registry for that domain ending, which it finds using the official list published by <a href="https://www.iana.org" target="_blank" rel="noopener noreferrer">IANA<span class="sr-only"> (opens in a new tab)</span></a>. If the registry doesn&rsquo;t answer, it asks <a href="https://rdap.org" target="_blank" rel="noopener noreferrer">rdap.org<span class="sr-only"> (opens in a new tab)</span></a>, a free lookup service, instead.</p>
     <p>We don&rsquo;t keep a record of these lookups. To keep the site fast, our hosting provider may cache each answer (the domain name and its registration date) for up to 24 hours. The cached answer does not include who asked.</p>
     <p>Your browser only ever talks to our own site. rdap.org and the registries see a request from our server, not from you, so they don&rsquo;t receive your IP address.</p>
+
+    <h2>Short link lookups</h2>
+    <p>If you check a shortened link from a well-known service such as bit.ly, TinyURL or t.co, Hook Check sends that short link (never your message) to our server function. The function asks the short-link service where the link leads and sends back the address it points to. It never opens that address, so nothing on the destination page is loaded.</p>
+    <p>The short-link service sees a request from our server, not from you, so it doesn&rsquo;t receive your IP address. We don&rsquo;t keep a record of these lookups. Our hosting provider may cache each answer (the short link and where it leads) for up to 24 hours, without who asked.</p>
 
     <h2>Hosting and server logs</h2>
     <p>The site is hosted by <a href="https://vercel.com" target="_blank" rel="noopener noreferrer">Vercel<span class="sr-only"> (opens in a new tab)</span></a>. Like any web host, Vercel automatically processes technical information such as your IP address, browser type and the page address you requested, to deliver the site and protect it from abuse. See <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Vercel&rsquo;s privacy policy<span class="sr-only"> (opens in a new tab)</span></a>.</p>
