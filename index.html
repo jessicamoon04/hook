@@ -355,6 +355,24 @@
     display: grid;
     gap: 12px;
   }
+  .msgcheck {
+    grid-column: 1 / -1;
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--line);
+    background: var(--v-bg);
+    display: grid;
+    gap: 10px;
+  }
+  .msgcheck[data-level="high"] { --v: var(--danger); --v-bg: var(--danger-bg); }
+  .msgcheck[data-level="med"]  { --v: var(--warn);   --v-bg: var(--warn-bg); }
+  .mc-title { margin: 0; font: 400 32px/1.05 var(--display); color: var(--v); }
+  .mc-lede { margin: 0; font-size: 15px; max-width: 75ch; }
+  .mc-signs { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 12px; }
+  .mc-signs li { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 12px; align-items: start; }
+  .mc-signs strong { font-weight: 700; margin-right: 8px; }
+  .mc-quote { font: 500 13px var(--mono); overflow-wrap: anywhere; }
+  .msgcheck .sev { background: var(--surface); border: 1px solid var(--line); }
+  .mc-signs p { margin: 2px 0 0; font-size: 14.5px; }
   .ll-title { margin: 0; font-weight: 600; }
   .ll-items { display: flex; flex-wrap: wrap; gap: 8px; }
   .ll-item {
@@ -621,7 +639,7 @@
     .nav .btn { display: none; }
     .hero-ctas .btn, .cta-actions .btn, .btn-check { flex: 1 1 100%; }
     .checker-card, .cta-box { padding: 22px; }
-    .details, .verdict, .linklist { padding: 20px; }
+    .details, .verdict, .linklist, .msgcheck { padding: 20px; }
     .ll-item code { max-width: 22ch; }
     .foot-grid { grid-template-columns: minmax(0, 1fr); }
   }
@@ -827,7 +845,7 @@
         <button class="btn btn-primary btn-check" type="submit" id="check-btn">Check for phishing</button>
         <span class="hint" id="url-hint">Enter to check, Shift+Enter for a new line.</span>
       </div>
-      <p class="form-note" id="form-note">Your text is checked in your browser and never stored. Only each website&rsquo;s domain name (like <code>example.com</code>) is sent to our server, to look up its age. <a href="privacy.html">Privacy Policy</a></p>
+      <p class="form-note" id="form-note">Your text is checked in your browser and never stored. Only each website&rsquo;s domain name (like <code>example.com</code>) is sent to our server to look up its age, plus any short links (like <code>bit.ly/...</code>) to see where they lead. <a href="privacy.html">Privacy Policy</a></p>
       <p class="form-error" id="url-error" role="alert"></p>
       <div class="examples" id="examples">
         <span>Try an example:</span>
@@ -841,6 +859,11 @@
 
   <p class="sr-only" id="live" aria-live="polite"></p>
   <section class="result" id="result" aria-label="Check result" hidden>
+    <div class="msgcheck" id="msgcheck" data-level="med" hidden>
+      <p class="mc-title" id="mc-title"></p>
+      <p class="mc-lede" id="mc-lede"></p>
+      <ul class="mc-signs" id="mc-signs" aria-label="Warning signs in the message"></ul>
+    </div>
     <div class="linklist" id="linklist" hidden>
       <p class="ll-title" id="ll-title"></p>
       <div class="ll-items" id="ll-items"></div>
@@ -849,7 +872,7 @@
       <span class="v-label">Verdict</span>
       <p class="v-title" id="v-title">Likely phishing</p>
       <div>
-        <div class="v-score"><span id="v-score">0</span> / 100 risk</div>
+        <div class="v-score"><span id="v-score">0</span> / 100 link risk</div>
         <div class="meter" aria-hidden="true"><i id="v-meter"></i></div>
         <div class="scale" aria-hidden="true"><span>0 safe</span><span>100 dangerous</span></div>
       </div>
@@ -860,7 +883,7 @@
         <input class="share-out" id="share-out" type="text" readonly hidden aria-label="Share link">
       </div>
     </div>
-    <div class="details">
+    <div class="details" id="details">
       <div>
         <h2>Who really owns this link</h2>
         <div class="anatomy" id="anatomy"></div>
@@ -895,12 +918,12 @@
     <li>
       <span class="step-num" aria-hidden="true">2</span>
       <h3>We inspect it</h3>
-      <p>Fake brand names, misspellings, hidden addresses, risky endings, and how many days old the website is.</p>
+      <p>Fake brand names, misspellings, risky downloads, where short links lead, scam wording in messages, and how old the website is.</p>
     </li>
     <li>
       <span class="step-num" aria-hidden="true">3</span>
       <h3>Get the verdict</h3>
-      <p>A risk score, who really owns the link, and each warning sign in plain English.</p>
+      <p>Safe, suspicious or likely phishing, with who really owns the link and each warning sign in plain English.</p>
     </li>
   </ol>
 </section>
@@ -963,7 +986,7 @@
           </svg>
           Hook Check
         </a>
-        <p>A free tool that spots the warning signs in suspicious links before you click. Messages you paste never leave your device. Only the bare domain name is sent, to look up when it was registered.</p>
+        <p>A free tool that spots the warning signs in suspicious links before you click. Messages you paste never leave your device. Only domain names and short links are sent, to look up their age and where they lead.</p>
       </div>
       <div>
         <h3>Product</h3>
@@ -993,7 +1016,7 @@
     <div class="foot-bottom">
       <span>&copy; 2026 Hook Check</span>
       <span><a href="privacy.html">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="cookies.html">Cookie Policy</a> &nbsp;&middot;&nbsp; <a href="terms.html">Terms of Use</a></span>
-      <span>A low score means no common warning signs, not a guarantee of safety.</span>
+      <span>&ldquo;Looks safe&rdquo; is our best judgement from the link itself, not a guarantee.</span>
     </div>
   </div>
 </footer>
@@ -1006,8 +1029,8 @@
     { name: "PayPal", tokens: ["paypal"], domains: ["paypal.com", "paypal.me"] },
     { name: "Apple", tokens: ["apple", "icloud", "appleid"], domains: ["apple.com", "icloud.com"] },
     { name: "Microsoft", tokens: ["microsoft", "outlook", "office365", "hotmail", "onedrive"], domains: ["microsoft.com", "live.com", "outlook.com", "office.com", "microsoftonline.com", "office365.com", "onedrive.com", "hotmail.com"] },
-    { name: "Google", tokens: ["google", "gmail"], domains: ["google.com", "gmail.com", "youtube.com", "goo.gl", "google.co.uk", "google.com.ng", "google.com.gh", "google.co.ke", "google.co.za", "google.co.in", "google.ca", "google.de", "google.fr", "google.com.au"] },
-    { name: "Amazon", tokens: ["amazon"], domains: ["amazon.com", "amazon.co.uk", "amazon.de", "amazon.in", "amazon.ca", "amazon.com.au", "amazon.co.jp", "amazon.fr"] },
+    { name: "Google", tokens: ["google", "gmail"], domains: ["google.com", "gmail.com", "youtube.com", "goo.gl", "googleapis.com", "googleusercontent.com", "google.co.uk", "google.com.ng", "google.com.gh", "google.co.ke", "google.co.za", "google.co.in", "google.ca", "google.de", "google.fr", "google.com.au"] },
+    { name: "Amazon", tokens: ["amazon"], domains: ["amazon.com", "amazonaws.com", "amazon.co.uk", "amazon.de", "amazon.in", "amazon.ca", "amazon.com.au", "amazon.co.jp", "amazon.fr"] },
     { name: "Facebook", tokens: ["facebook"], domains: ["facebook.com", "fb.com", "meta.com"] },
     { name: "Instagram", tokens: ["instagram"], domains: ["instagram.com"] },
     { name: "Netflix", tokens: ["netflix"], domains: ["netflix.com"] },
@@ -1026,14 +1049,42 @@
     { name: "eBay", tokens: ["ebay"], domains: ["ebay.com", "ebay.co.uk"] },
     { name: "Adobe", tokens: ["adobe"], domains: ["adobe.com"] },
     { name: "Dropbox", tokens: ["dropbox"], domains: ["dropbox.com"] },
-    { name: "DocuSign", tokens: ["docusign"], domains: ["docusign.com", "docusign.net"] }
+    { name: "DocuSign", tokens: ["docusign"], domains: ["docusign.com", "docusign.net"] },
+    // Nigerian banks and payment apps, official addresses confirmed with the site owner
+    { name: "GTBank", tokens: ["gtbank", "gtworld"], domains: ["gtbank.com"] },
+    { name: "UBA", tokens: ["uba", "ubagroup", "ubaonline"], domains: ["ubagroup.com"] },
+    { name: "First Bank", tokens: ["firstbank", "firstbanknigeria", "firstbankng"], domains: ["firstbanknigeria.com", "firstbankgroup.com"] },
+    { name: "OPay", tokens: ["opay", "opayweb"], domains: ["opayweb.com"] }
   ];
+  // Real, unrelated companies that share a brand's name, so they're never called fakes
+  var SAME_NAME_OTHERS = ["firstbank.com", "firstbankpr.com"];
+  // Names that are only checked for exact look-alikes (ubagr0up), not near-misses,
+  // because close spellings are ordinary words or other businesses (usagroup)
+  var NO_FUZZY = ["ubagroup", "ubaonline"];
   var MULTI_SUFFIX = ["co.uk", "org.uk", "gov.uk", "ac.uk", "com.au", "net.au", "co.nz", "co.jp", "co.in", "com.br", "com.mx", "co.za", "com.cn", "com.sg", "com.tr",
     "com.ng", "org.ng", "gov.ng", "edu.ng", "net.ng", "com.gh", "co.ke", "co.tz", "co.ug", "com.eg"];
   // Pages on these official addresses can be made by anyone with a free account
-  var USER_CONTENT_HOSTS = ["sites.google.com", "docs.google.com", "drive.google.com", "script.google.com", "forms.office.com", "sway.office.com", "onedrive.live.com"];
+  var USER_CONTENT_HOSTS = ["sites.google.com", "docs.google.com", "drive.google.com", "drive.usercontent.google.com", "script.google.com", "storage.googleapis.com",
+    "firebasestorage.googleapis.com", "forms.office.com", "sway.office.com", "onedrive.live.com"];
+  // Whole domains a company owns but rents out to anyone: every address under them can be someone else's
+  var USER_CONTENT_DOMAINS = ["amazonaws.com", "googleusercontent.com"];
+  // File-sharing and cloud-storage addresses: real services, but anyone can upload to them
+  var UPLOAD_HOSTS = ["mediafire.com", "wetransfer.com", "we.tl", "cdn.discordapp.com", "media.discordapp.net", "raw.githubusercontent.com", "objects.githubusercontent.com",
+    "gist.githubusercontent.com", "release-assets.githubusercontent.com", "dl.dropboxusercontent.com", "mega.nz", "1drv.ms", "gofile.io", "pixeldrain.com", "sendspace.com",
+    "4shared.com", "transfer.sh", "file.io", "filetransfer.io", "blob.core.windows.net", "telegra.ph", "forms.gle"];
+  // Sites where only some pages are shared files: Dropbox and Box share links, GitHub downloads
+  var UPLOAD_PATHS = [
+    { d: "dropbox.com", p: /^\/(s|scl|sh|t|transfer)\//i },
+    { d: "box.com", p: /^\/(s|shared)\//i },
+    { d: "github.com", p: /^\/[^\/]+\/[^\/]+\/(releases\/download|raw)\//i }
+  ];
+  // Files that install or run something when opened
+  var RUN_EXTS = ["exe", "scr", "msi", "msix", "appx", "bat", "cmd", "pif", "vbs", "vbe", "js", "jse", "wsf", "hta", "ps1", "lnk", "jar", "apk", "xapk", "apks", "dmg", "pkg", "iso", "img", "vhd", "vhdx", "reg", "cpl"];
+  var MACRO_EXTS = ["docm", "xlsm", "pptm", "dotm", "xlam"];
+  var ARCHIVE_EXTS = ["zip", "rar", "7z", "gz", "tgz", "cab", "ace", "arj"];
+  var DOC_EXTS = ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "jpg", "jpeg", "png", "gif", "txt", "csv", "rtf", "mp3", "mp4", "mov"];
   // Brand names that are also everyday words: only count them as a whole word, never inside a longer one
-  var WHOLE_WORD_TOKENS = ["outlook"];
+  var WHOLE_WORD_TOKENS = ["outlook", "firstbank", "ubagroup", "ubaonline"];
   // Cyrillic and Greek letters that look the same as Latin ones, used to spell fake brand names
   var CONFUSABLES = {
     "а": "a", "е": "e", "о": "o", "р": "p", "с": "c", "у": "y", "х": "x",
@@ -1041,7 +1092,8 @@
     "ӏ": "l", "к": "k", "ɡ": "g", "α": "a", "ο": "o", "ρ": "p", "ν": "v",
     "ι": "i", "κ": "k", "υ": "u", "ε": "e"
   };
-  var SHORTENERS = ["bit.ly", "tinyurl.com", "t.co", "goo.gl", "is.gd", "ow.ly", "cutt.ly", "rebrand.ly", "shorturl.at", "tiny.cc", "rb.gy", "buff.ly", "t.ly", "s.id", "v.gd"];
+  // Keep in step with the list in api/expand.js
+  var SHORTENERS = ["bit.ly", "tinyurl.com", "t.co", "goo.gl", "is.gd", "ow.ly", "cutt.ly", "rebrand.ly", "shorturl.at", "tiny.cc", "rb.gy", "buff.ly", "t.ly", "s.id", "v.gd", "lnkd.in", "amzn.to"];
   var FREE_HOSTS = ["000webhostapp.com", "weebly.com", "wixsite.com", "firebaseapp.com", "web.app", "pages.dev", "netlify.app", "vercel.app", "github.io", "glitch.me", "repl.co", "blogspot.com", "herokuapp.com", "ngrok.io", "ngrok-free.app", "workers.dev", "square.site", "godaddysites.com", "webflow.io", "r2.dev", "ipfs.io", "framer.website"];
   var SUS_TLDS = ["zip", "mov", "xyz", "top", "tk", "ml", "ga", "cf", "gq", "click", "link", "work", "rest", "cam", "icu", "buzz", "monster", "sbs", "cfd", "country", "kim", "quest", "lol", "support", "cyou", "bond"];
   var KEYWORDS = ["login", "log-in", "signin", "sign-in", "verify", "verification", "secure", "account", "update", "confirm", "banking", "password", "wallet", "unlock", "suspend", "billing", "invoice", "recover", "validate", "authenticate"];
@@ -1166,6 +1218,65 @@
     return null;
   }
 
+  /* ---------- scam wording in a pasted message ---------- */
+
+  // Every pattern has bounded gaps, so long or hostile pastes stay fast
+  var MSG_SIGNS = [
+    { lvl: "high", title: "Asks for a code, PIN or password",
+      re: /\b(?:send|share|give|provide|forward|reply(?: with)?|tell|confirm|drop|submit|enter|input|type in)\b[^.!?\n]{0,60}?\b(?:otp|one[- ]time (?:password|pin|code)|verification code|security code|\d[- ]digit code|pin|cvv|cvc|bvn|nin|password|passcode|card (?:number|details)|login details)\b/i,
+      detail: "No real bank, delivery company or app will ask you to send an OTP, PIN, BVN or password. Anyone who asks is trying to get into your account." },
+    { lvl: "high", title: "Asks to be paid in gift cards",
+      re: /\b(?:buy|send|purchase|pay(?: with| in)?|get)\b[^.!?\n]{0,40}?\b(?:gift ?cards?|itunes cards?|steam cards?|google play cards?|apple cards?|amazon cards?)\b/i,
+      detail: "Real companies and government offices never ask to be paid in gift cards. It's one of the most common scams." },
+    { lvl: "med", title: "Asks for a fee before you get paid",
+      re: /\b(?:processing|release|clearance|activation|unlock(?:ing)?|withdrawal) (?:fee|charge)s?\b/i,
+      detail: "Being told to pay a small fee before you can receive a prize, loan, refund or parcel is a classic advance-fee scam." },
+    { lvl: "med", title: "Threatens your account",
+      re: /\b(?:account|card|line|sim|bvn|nin|wallet|profile|access)\b[^.!?\n]{0,40}?\b(?:blocked|suspended|restricted|locked|deactivated|frozen|disabled|terminated|on hold|compromised)\b/i,
+      detail: "Saying your account is blocked or about to be shut down is meant to scare you into acting before you think." },
+    { lvl: "med", title: "Promises a prize or free money",
+      re: /\b(?:congratulations|congrats|you(?:'ve| have) (?:won|been (?:selected|chosen|shortlisted))|lottery|jackpot|you(?:'re| are) (?:a|our|the) (?:lucky )?winner|free (?:data|airtime|money|cash|iphone|gift)|claim (?:your|the) (?:reward|prize|gift|bonus|money|funds|payment|grant))\b/i,
+      detail: "Unexpected prizes, grants and free airtime or data are bait. You can't win a draw you never entered." },
+    { lvl: "med", title: "Promises easy returns",
+      re: /\b(?:double your (?:money|investment|bitcoin|crypto)|guaranteed (?:returns?|profits?|income)|\d{2,3}% (?:daily|weekly|monthly|returns?|profit|roi)|risk[- ]free investment)\b/i,
+      detail: "Guaranteed or very high returns are the mark of investment and crypto scams. Real investments carry risk." },
+    { lvl: "med", title: "Asks you to keep it secret", noNeg: true,
+      re: /\b(?:don't|dont|do not|never) (?:tell|inform|let) (?:anyone|anybody|your (?:family|bank|friends?))\b|\bkeep (?:this|it) (?:secret|confidential|between us)\b/i,
+      detail: "Scammers tell you not to talk to anyone because your family, friends or bank would spot the scam." },
+    { lvl: "low", title: "Rushes you",
+      re: /\b(?:urgent(?:ly)?|immediately|act now|final (?:warning|notice|reminder)|last chance|expires? today|right away|asap)\b/i,
+      detail: "Scammers set short deadlines so you don't stop to check. Real companies give you time." },
+    { lvl: "low", title: "Asks you to confirm your details",
+      re: /\b(?:verify|confirm|update|validate|re-?activate|unlock|re-?validate)\b[^.!?\n]{0,40}?\b(?:account|details|information|info|bvn|nin|identity|card|wallet|kyc)\b/i,
+      detail: "Fake messages ask you to \"verify\" or \"update\" your details so you type them into a copied page. Open the app or website yourself instead." }
+  ];
+  var MSG_PTS = { high: 4, med: 2, low: 1 };
+  // "Never share your OTP" is advice, not a request, so a "never" or "don't" just before a match cancels it
+  var NEGATED = /\b(?:never|not|don't|dont|no one|nobody|won't|will not)\b[^.!?\n]{0,16}$/i;
+
+  function scanMessage(text) {
+    // Links are checked on their own, so take them out first: "/verify-account" in a link isn't the message talking
+    var clean = text.replace(/[‘’]/g, "'").split(/(\s+)/).map(function (t, i) {
+      if (i % 2 || t.length > 2048) return t;
+      var bare = t.replace(/[.,;:!?)\]}>'"`]+$/, "");
+      return /https?:\/\/|www\./i.test(t) || (bare.indexOf(".") > 0 && BARE_HOST.test(bare)) ? " " : t;
+    }).join("");
+    var signs = [], pts = 0;
+    MSG_SIGNS.forEach(function (sg) {
+      var re = new RegExp(sg.re.source, "gi"), m, tries = 0;
+      while ((m = re.exec(clean)) && tries++ < 25) {
+        if (!sg.noNeg && NEGATED.test(clean.slice(Math.max(0, m.index - 30), m.index))) continue;
+        signs.push({ level: sg.lvl, title: sg.title, detail: sg.detail, quote: m[0].replace(/\s+/g, " ") });
+        pts += MSG_PTS[sg.lvl];
+        break;
+      }
+    });
+    // One mild sign on its own ("urgent", "update your details") is too common in real messages to report
+    if (pts < 2) return null;
+    // A threat plus a request ("account suspended, verify now") is already the full scam pattern
+    return { tone: pts >= 3 ? "high" : "med", signs: signs };
+  }
+
   function analyze(raw, depth) {
     var input = raw.trim();
     if (!input) return { error: "Paste a link to check it." };
@@ -1216,7 +1327,7 @@
     var lookLabel = isIP ? label : skeleton(readableHost(label));
     var disguised = lookHost !== host;
 
-    if (!isIP && !official) {
+    if (!isIP && !official && SAME_NAME_OTHERS.indexOf(parts.reg) === -1) {
       var words = lookHost.split(/[.-]/);
       var flat = lookHost.replace(/[.-]/g, "");
       var hit = null;
@@ -1242,7 +1353,7 @@
             if (tk.length < 4) continue;
             var looksLike = pieces.some(function (p) {
               return deleet(p, "l") === tk || deleet(p, "i") === tk ||
-                (tk.length >= 6 && lev(p, tk) === 1) || (tk.length >= 8 && lev(p, tk) === 2);
+                (NO_FUZZY.indexOf(tk) === -1 && ((tk.length >= 6 && lev(p, tk) === 1) || (tk.length >= 8 && lev(p, tk) === 2)));
             });
             if (looksLike) { typo = BRANDS[b2]; break; }
           }
@@ -1257,15 +1368,41 @@
     }
 
     // Official addresses where anyone can publish: Google Sites, Google Forms, OneDrive and similar
-    var userContent = !!official && USER_CONTENT_HOSTS.indexOf(host) !== -1;
+    var sharedPath = UPLOAD_PATHS.some(function (x) { return endsWithDomain(host, x.d) && x.p.test(url.pathname); });
+    var userContent = !!official && (USER_CONTENT_HOSTS.indexOf(host) !== -1 || sharedPath ||
+      USER_CONTENT_DOMAINS.some(function (d) { return endsWithDomain(host, d); }));
     if (userContent) {
       add("med", 15, "Anyone can publish pages here", host + " belongs to " + official.name + ", but anyone with a free account can make pages, forms and files on it. Scammers use it because the address looks trustworthy.");
       var upm = pathMention(url);
       if (upm && upm.brand !== official) add("med", 12, "Mentions " + upm.brand.name + " on a page anyone could have made", "The address includes \"" + upm.token + "\". " + upm.brand.name + " doesn't run its pages on " + host + ".");
     }
 
-    if (SHORTENERS.indexOf(parts.reg) !== -1 || SHORTENERS.indexOf(host) !== -1) {
+    if (!official && !isIP && (sharedPath || UPLOAD_HOSTS.some(function (d) { return endsWithDomain(host, d); }))) {
+      add("med", 15, "Anyone can upload files here", host + " is a real file-sharing or storage service, but anyone with a free account can upload to it. Scammers use it for fake invoices, harmful files and copied sign-in pages.");
+    }
+
+    var isShort = SHORTENERS.indexOf(parts.reg) !== -1 || SHORTENERS.indexOf(host) !== -1;
+    if (isShort) {
       add("med", 15, "Shortened link", "Short links hide where they really go. You can't tell the destination until you click.");
+    }
+
+    // What the link downloads, judged by the file name at its end
+    var fileName = safeDecode(url.pathname.split("/").pop() || "").toLowerCase();
+    var exts = fileName.split(".").slice(1);
+    var ext = exts.length ? exts[exts.length - 1] : "";
+    var prevExt = exts.length > 1 ? exts[exts.length - 2] : "";
+    var runs = RUN_EXTS.indexOf(ext) !== -1, packed = ARCHIVE_EXTS.indexOf(ext) !== -1;
+    if ((runs || packed) && DOC_EXTS.indexOf(prevExt) !== -1) {
+      add("high", 40, "File pretending to be a ." + prevExt,
+        "\"" + fileName + "\" looks like a ." + prevExt + " file, but it's really a ." + ext + (runs ? " file that can install harmful software when opened." : " archive that can hide harmful programs."));
+    } else if (ext === "apk" || ext === "xapk" || ext === "apks") {
+      add("med", 15, "Downloads an Android app", "Apps from outside the Play Store are a common way to steal banking details and one-time codes. Only install apps from the official store.");
+    } else if (runs) {
+      add("med", 15, "Downloads a program", "This link downloads a ." + ext + " file, which can install or run software on your device. Only open it if it comes straight from the company that makes the software.");
+    } else if (MACRO_EXTS.indexOf(ext) !== -1) {
+      add("med", 12, "Office file that can run code", "." + ext + " files can contain macros, small programs that run when you allow them. Never click \"Enable content\" on a file you didn't expect.");
+    } else if (packed) {
+      add("med", 10, "Downloads a compressed file", "A ." + ext + " file can hide harmful programs inside. If you open it, don't run anything inside that ends in .exe, .js, .scr or .bat.");
     }
     var tld = host.split(".").pop();
     if (!isIP && SUS_TLDS.indexOf(tld) !== -1) {
@@ -1330,7 +1467,8 @@
     }
 
     // Only a plain official address earns the discount; not one anyone can publish on, or one that forwards elsewhere
-    if (official && !userContent && !redirectsAway) {
+    var trusted = !!official && !userContent && !redirectsAway && !isShort;
+    if (trusted) {
       score = Math.max(0, score - 25);
       add("good", 0, "Official " + official.name + " address", parts.reg + " belongs to " + official.name + ". Still check that you expected this message.");
     }
@@ -1339,12 +1477,12 @@
         add("good", 0, "Encrypted connection", "The link uses https://. Most phishing sites do too, so this alone doesn't make it safe.");
       }
       if (!official) {
-        add("good", 0, "No common phishing patterns", "That doesn't prove the site is safe. If the message was unexpected, use a second opinion below.");
+        add("good", 0, "No common phishing patterns", "None of the usual tricks are in this address. For an unexpected message, you can also get a second opinion below.");
         findings[findings.length - 1].clean = true;
       }
     }
 
-    return { input: input, url: url, noScheme: noScheme, host: host, parts: parts, isIP: isIP, official: official, score: Math.min(100, score), findings: findings };
+    return { input: input, url: url, noScheme: noScheme, host: host, parts: parts, isIP: isIP, official: official, trusted: trusted, shortener: isShort, score: Math.min(100, score), findings: findings };
   }
 
   /* ---------- domain age ---------- */
@@ -1366,6 +1504,25 @@
       return { failed: true };
     });
     return ageCache[domain];
+  }
+
+  // Asks our own /api function where a short link leads. The destination itself is never opened.
+  var expandCache = {};
+  function lookupExpand(link) {
+    if (expandCache[link]) return expandCache[link];
+    var api = /^https?:$/.test(location.protocol)
+      ? fetch("/api/expand?url=" + encodeURIComponent(link)).then(function (res) {
+          if (!res.ok) throw new Error("api " + res.status);
+          return res.json();
+        })
+      : Promise.reject(new Error("no api"));
+    expandCache[link] = api.then(function (d) {
+      return d && typeof d.final === "string" ? { final: d.final } : { failed: true };
+    }).catch(function () {
+      delete expandCache[link];
+      return { failed: true };
+    });
+    return expandCache[link];
   }
 
   function ageFinding(info, reg) {
@@ -1403,14 +1560,38 @@
   var state = { items: [], selected: 0, token: 0 };
   var ORDER = { high: 0, med: 1, low: 2, good: 3, wait: 4 };
 
-  function needsAge(r) { return !r.special && !r.isIP && !r.official; }
+  function needsAge(r) { return !r.special && !r.isIP && !r.official && !r.shortener; }
 
   // Combine the instant checks with the domain-age result once it arrives
   function view(item) {
     var r = item.result;
+
+    // Once we know where a short link leads, the verdict is about that address
+    if (r.shortener && !item.isDest && item.dest) {
+      var dv = view(item.dest);
+      var dt = TONE[dv.kind];
+      var shown = item.dest.result.input.length > 90 ? item.dest.result.input.slice(0, 90) + "..." : item.dest.result.input;
+      return {
+        score: dv.score, level: dv.level, kind: dv.kind, note: dv.note,
+        findings: [{ level: dt === "low" ? "good" : dt, title: "Short link leads to " + item.dest.result.parts.reg,
+          detail: "We asked the short-link service where this goes, without opening it. It leads to " + shown + ", and the verdict is for that address." }].concat(dv.findings)
+      };
+    }
+    var pendingShort = r.shortener && !item.isDest && item.exp === undefined;
+
     var f = r.findings.slice();
+    if (r.shortener && !item.isDest) {
+      f.push(pendingShort
+        ? { level: "wait", title: "Checking where this short link leads", detail: "We ask the short-link service for the real address, without opening it." }
+        : { level: "low", title: "Couldn't see where this short link leads", detail: "The short-link service didn't say, so the real destination is unknown. Treat it with care." });
+    }
     var s = r.score;
+    var ageDays = -1;
     if (needsAge(r)) {
+      if (item.age && item.age.registered) {
+        var reg = new Date(item.age.registered);
+        if (!isNaN(reg)) ageDays = Math.floor((Date.now() - reg.getTime()) / 86400000);
+      }
       if (item.age === undefined) {
         f.push({ level: "wait", title: "Checking when " + r.parts.reg + " was registered", detail: "Brand-new websites are one of the strongest signs of a phishing scam." });
       } else {
@@ -1424,14 +1605,54 @@
     }
     f.sort(function (x, y) { return ORDER[x.level] - ORDER[y.level]; });
     s = Math.min(100, s);
-    return { score: s, level: s >= 45 ? "high" : s >= 20 ? "med" : "low", findings: f };
+    var level = s >= 45 ? "high" : s >= 20 ? "med" : "low";
+
+    // "Safe" is only said when there's a positive reason: the brand's own address,
+    // or a website over a year old with no warning signs at all
+    var kind = level, note = null;
+    if (level === "low") {
+      var warned = f.some(function (x) { return x.level === "high" || x.level === "med"; });
+      if (pendingShort) {
+        kind = "checking";
+        note = "Still checking where this short link leads.";
+      } else if (warned) {
+        kind = "caution";
+      } else if (r.trusted) {
+        kind = "safe";
+        note = "This is " + r.official.name + "'s real website, so the link is safe to open. Only sign in if you were expecting the message.";
+      } else if (needsAge(r) && item.age === undefined) {
+        kind = "checking";
+      } else if (ageDays >= 365 && s < 10) {
+        var yrs = Math.floor(ageDays / 365);
+        kind = "safe";
+        note = r.parts.reg + " has been online for " + yrs + (yrs === 1 ? " year" : " years") + " with no serious warning signs, so it should be safe to open.";
+      } else {
+        kind = "clear";
+      }
+    }
+    // A real link inside a scam message is still a scam: the danger is what the message asks you to do
+    if (state.msg && state.msg.tone === "high" && TONE[kind] !== "high") {
+      kind = "msgrisk";
+      note = "The message around this link uses scam tactics, listed above. Don't reply with codes, PINs or passwords, and don't pay anything.";
+    }
+    return { score: s, level: level, kind: kind, note: note || NOTES[kind], findings: f };
   }
 
-  var TITLES = { high: "Likely phishing", med: "Suspicious", low: "Low risk" };
+  var TITLES = { high: "Likely phishing", med: "Suspicious", msgrisk: "Risky message", caution: "Be careful", safe: "Looks safe", clear: "No major warning signs", checking: "No major warning signs yet" };
   var NOTES = {
     high: "Don't open this link or type anything into it. If it came in a message, report it and delete it.",
     med: "Several warning signs. Go to the company's site yourself instead of using this link.",
-    low: "No common warning signs. If the message was unexpected, still be careful."
+    caution: "There's a warning sign below, though not enough to call it phishing. Only open it if you trust who sent it.",
+    clear: "Nothing here points to phishing, but we couldn't confirm enough to call it safe. Only open it if you trust who sent it.",
+    checking: "Still checking how long this website has existed."
+  };
+  var SHARE = { high: "is likely phishing", med: "looks suspicious", msgrisk: "came in a message that looks like a scam", caution: "needs care", safe: "looks safe", clear: "shows no major warning signs", checking: "shows no major warning signs" };
+  // Colour of the verdict panel and list badges
+  var TONE = { high: "high", med: "med", msgrisk: "high", caution: "med", safe: "low", clear: "low", checking: "low" };
+  var MSG_TITLES = { high: "This message looks like a scam", med: "This message uses pressure tactics" };
+  var MSG_LEDES = {
+    high: "Don't reply with codes or PINs, don't pay anything, and don't sign in through this message, even if the link looks real.",
+    med: "Be wary of what it asks you to do. If it claims to be from a company, contact them through their own app or website."
   };
 
   function span(cls, text) {
@@ -1445,7 +1666,7 @@
     var box = $("linklist");
     if (state.items.length < 2) { box.hidden = true; return; }
     box.hidden = false;
-    var risky = state.items.filter(function (it) { return view(it).level !== "low"; }).length;
+    var risky = state.items.filter(function (it) { return TONE[view(it).kind] !== "low"; }).length;
     $("ll-title").textContent = "Found " + state.items.length + " links in your message" +
       (risky ? ", " + risky + " with warning signs." : ", none with obvious warning signs.") + " Select one to see its report.";
     var wrap = $("ll-items");
@@ -1457,8 +1678,9 @@
       btn.className = "ll-item";
       btn.setAttribute("aria-pressed", i === state.selected ? "true" : "false");
       btn.setAttribute("data-index", i);
-      btn.appendChild(span("sev sev-" + (v.level === "low" ? "good" : v.level), String(v.score)));
-      btn.appendChild(span("sr-only", " risk, " + TITLES[v.level] + ": "));
+      var tone = TONE[v.kind];
+      btn.appendChild(span("sev sev-" + (tone === "low" ? "good" : tone), String(v.score)));
+      btn.appendChild(span("sr-only", " risk, " + TITLES[v.kind] + ": "));
       var c = document.createElement("code");
       c.textContent = it.result.input;
       btn.appendChild(c);
@@ -1470,11 +1692,11 @@
   function renderReport(item) {
     var r = item.result;
     var v = view(item);
-    $("verdict").setAttribute("data-level", v.level);
-    $("v-title").textContent = TITLES[v.level];
+    $("verdict").setAttribute("data-level", TONE[v.kind]);
+    $("v-title").textContent = TITLES[v.kind];
     $("v-score").textContent = v.score;
     $("v-meter").style.width = Math.max(v.score, 2) + "%";
-    $("v-note").textContent = NOTES[v.level];
+    $("v-note").textContent = v.note;
 
     var an = $("anatomy");
     an.textContent = "";
@@ -1527,13 +1749,49 @@
 
   function announceVerdict() {
     var item = state.items[state.selected];
-    if (!item) return;
+    var pre = state.msg ? MSG_TITLES[state.msg.tone] + ". " : "";
+    if (!item) { if (pre) announce(pre + state.msg.signs.length + " warning signs in the text."); return; }
     var v = view(item);
     var many = state.items.length > 1 ? "Found " + state.items.length + " links. Showing " + item.result.input + ". " : "";
-    announce(many + TITLES[v.level] + ", " + v.score + " out of 100 risk. " + v.findings.length + " findings.");
+    announce(pre + many + TITLES[v.kind] + ", " + v.score + " out of 100 risk. " + v.findings.length + " findings.");
+  }
+
+  function renderMsg() {
+    var box = $("msgcheck"), m = state.msg;
+    box.hidden = !m;
+    if (!m) return;
+    box.setAttribute("data-level", m.tone);
+    $("mc-title").textContent = MSG_TITLES[m.tone];
+    $("mc-lede").textContent = MSG_LEDES[m.tone];
+    var ul = $("mc-signs");
+    ul.textContent = "";
+    m.signs.slice().sort(function (x, y) { return ORDER[x.level] - ORDER[y.level]; }).forEach(function (sg) {
+      var li = document.createElement("li");
+      li.appendChild(span("sev sev-" + sg.level, { high: "HIGH", med: "MED", low: "LOW" }[sg.level]));
+      var body = document.createElement("div");
+      var strong = document.createElement("strong");
+      strong.textContent = sg.title;
+      body.appendChild(strong);
+      body.appendChild(span("mc-quote", "“" + (sg.quote.length > 80 ? sg.quote.slice(0, 80) + "..." : sg.quote) + "”"));
+      var p = document.createElement("p");
+      p.textContent = sg.detail;
+      body.appendChild(p);
+      li.appendChild(body);
+      ul.appendChild(li);
+    });
+  }
+
+  // Redraw after a lookup finishes, and tell screen readers if the shown verdict changed
+  function refresh(it, lead) {
+    renderAll();
+    if (it === state.items[state.selected]) {
+      var nv = view(it);
+      announce((lead ? lead + ". " : "") + "Verdict: " + TITLES[nv.kind] + ", " + nv.score + " out of 100 risk.");
+    }
   }
 
   function renderAll() {
+    renderMsg();
     renderList();
     if (state.items.length) renderReport(state.items[state.selected]);
   }
@@ -1548,9 +1806,11 @@
     var text = input.value.trim();
     if (!text) { setError("Paste a link or a message to check."); return false; }
 
-    var links = /\s/.test(text) ? extractLinks(text) : [text];
-    if (!links.length) {
-      setError("We couldn't find any links in that text. If you have the link itself, paste it on its own.");
+    var isMessage = /\s/.test(text);
+    var links = isMessage ? extractLinks(text) : [text];
+    var msg = isMessage ? scanMessage(text) : null;
+    if (!links.length && !msg) {
+      setError("We couldn't find any links or common scam wording in that text. If you have the link itself, paste it on its own.");
       return false;
     }
 
@@ -1558,17 +1818,21 @@
     for (var i = 0; i < links.length; i++) {
       var r = analyze(links[i]);
       if (r.error) {
-        if (links.length === 1) { setError(r.error); return false; }
+        if (links.length === 1 && !msg) { setError(r.error); return false; }
         continue;
       }
       items.push({ result: r, age: undefined });
     }
-    if (!items.length) { setError("None of the links in that text could be read. Try pasting the link on its own."); return false; }
+    if (!items.length && !msg) { setError("None of the links in that text could be read. Try pasting the link on its own."); return false; }
 
     setError("");
     $("share-status").textContent = "";
     $("share-out").hidden = true;
     state.items = items;
+    state.msg = msg;
+    // A message with scam wording but no links gets only the message panel
+    $("verdict").hidden = !items.length;
+    $("details").hidden = !items.length;
     $("result").hidden = false;
     state.token++;
     state.selected = 0;
@@ -1578,16 +1842,36 @@
 
     var token = state.token;
     items.forEach(function (it) {
-      if (!needsAge(it.result)) return;
-      lookupAge(it.result.parts.reg).then(function (info) {
-        if (token !== state.token) return;
-        it.age = info;
-        renderAll();
-        if (it === state.items[state.selected]) {
+      if (needsAge(it.result)) {
+        lookupAge(it.result.parts.reg).then(function (info) {
+          if (token !== state.token) return;
+          it.age = info;
           var a = ageFinding(info, it.result.parts.reg);
-          if (a) announce(a.title + ". Risk is now " + view(it).score + " out of 100.");
-        }
-      });
+          refresh(it, a && a.title);
+        });
+      }
+      if (it.result.shortener) {
+        lookupExpand(it.result.url.href).then(function (ex) {
+          if (token !== state.token) return;
+          var dest = ex.final ? analyze(ex.final) : null;
+          if (!dest || dest.error || dest.special) {
+            it.exp = { failed: true };
+            refresh(it, "Couldn't see where the short link leads");
+            return;
+          }
+          it.exp = ex;
+          it.dest = { result: dest, age: undefined, isDest: true };
+          refresh(it, "The short link leads to " + dest.parts.reg);
+          if (needsAge(dest)) {
+            lookupAge(dest.parts.reg).then(function (info) {
+              if (token !== state.token) return;
+              it.dest.age = info;
+              var a = ageFinding(info, dest.parts.reg);
+              refresh(it, a && a.title);
+            });
+          }
+        });
+      }
     });
     return true;
   }
@@ -1603,7 +1887,7 @@
     if (!item) return;
     var v = view(item);
     var link = shareLink(item.result.input);
-    var text = "Hook Check says this link is " + TITLES[v.level].toLowerCase() + " (" + v.score + "/100 risk).";
+    var text = "Hook Check says this link " + SHARE[v.kind] + " (" + v.score + "/100 risk).";
     var status = $("share-status"), out = $("share-out");
     var coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
     if (navigator.share && coarse) {
